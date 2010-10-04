@@ -62,11 +62,10 @@ public final class FBView extends ZLTextView {
 					(!cursor.isEndOfParagraph() || !cursor.getParagraphCursor().isLast())) {
 					startAutoScrolling(preferences.HorizontalOption.getValue() ? PAGE_RIGHT : PAGE_BOTTOM);
   				} else {
-                    // My fix to return back to text view
-                    if (myReader.getCurrentView() != myReader.BookTextView) {
-                        myReader.showBookTextView();
-                    }
-                }
+					if (myReader.getCurrentView() != myReader.BookTextView) {
+						myReader.showBookTextView();
+					}
+				}
 			} else {
 				ZLTextWordCursor cursor = getStartCursor();
 				if (cursor != null &&
@@ -74,11 +73,10 @@ public final class FBView extends ZLTextView {
 					(!cursor.isStartOfParagraph() || !cursor.getParagraphCursor().isFirst())) {
 					startAutoScrolling(preferences.HorizontalOption.getValue() ? PAGE_LEFT : PAGE_TOP);
  				} else {
-                    // My fix to return back to text view
-                    if (myReader.getCurrentView() != myReader.BookTextView) {
-                        myReader.showBookTextView();
-                    }
-                }
+					if (myReader.getCurrentView() != myReader.BookTextView) {
+						myReader.showBookTextView();
+					}
+				}
 			}
 		} else {
 			scrollPage(forward, ZLTextView.ScrollingMode.NO_OVERLAPPING, 0);
@@ -118,8 +116,8 @@ public final class FBView extends ZLTextView {
 			return true;
 		}
 
-        myStartX = x;
-        myStartY = y;
+		myStartX = x;
+		myStartY = y;
 
 		if (x < 20) {
 			return false;
@@ -155,15 +153,15 @@ public final class FBView extends ZLTextView {
 		}
 
 		synchronized (this) {
-            if (x < 20) {
+			if (x < 20) {
 				final int diff = y - myStartY;
 				if (diff > 2) {
-                    org.geometerplus.android.fbreader.FBReader.getInstance().setBrightness(-Math.round((float)diff / (float)Context.getHeight() * (float)100));
+					org.geometerplus.android.fbreader.FBReader.getInstance().setBrightness(-Math.round((float)diff / (float)Context.getHeight() * (float)100));
 				} else if (diff < -2) {
-                    org.geometerplus.android.fbreader.FBReader.getInstance().setBrightness(-Math.round((float)diff / (float)Context.getHeight() * (float)100));
-                }
-                myStartY = y;
-            } else if (isScrollingActive() && myIsManualScrollingActive) {
+					org.geometerplus.android.fbreader.FBReader.getInstance().setBrightness(-Math.round((float)diff / (float)Context.getHeight() * (float)100));
+				}
+				myStartY = y;
+			} else if (isScrollingActive() && myIsManualScrollingActive) {
 				final boolean horizontal = ScrollingPreferences.Instance().HorizontalOption.getValue();
 				final int diff = horizontal ? x - myStartX : y - myStartY;
 				if (diff > 0) {

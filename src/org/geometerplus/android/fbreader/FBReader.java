@@ -46,7 +46,6 @@ import org.geometerplus.zlibrary.ui.android.R;
 
 import org.geometerplus.fbreader.bookmodel.BookModel;
 import org.geometerplus.fbreader.fbreader.ActionCode;
-//import android.util.Log;
 import android.provider.Settings;
 
 public final class FBReader extends ZLAndroidActivity {
@@ -179,9 +178,9 @@ public final class FBReader extends ZLAndroidActivity {
 	@Override
 	public void onStop() {
 		ControlButtonPanel.removeControlPanels();
-        if (additionalInfo) {
-            app.ScrollbarTypeOption.setValue(scrollbarOpt);
-        }
+		if (additionalInfo) {
+			app.ScrollbarTypeOption.setValue(scrollbarOpt);
+		}
 		super.onStop();
 	}
 
@@ -193,13 +192,13 @@ public final class FBReader extends ZLAndroidActivity {
 		}
 	}
 
-    private static org.geometerplus.fbreader.fbreader.FBReader app;
+	private static org.geometerplus.fbreader.fbreader.FBReader app;
 	protected ZLApplication createApplication(String fileName) {
 		new SQLiteBooksDatabase();
 		String[] args = (fileName != null) ? new String[] { fileName } : new String[0];
 
 		app = new org.geometerplus.fbreader.fbreader.FBReader(args);
-        return app;
+		return app;
 	}
 
 	@Override
@@ -320,56 +319,55 @@ public final class FBReader extends ZLAndroidActivity {
 		return "" + page + " / " + pagesNumber;
 	}
 
-    private int scrollbarOpt;
-    private boolean additionalInfo = false;
+	private int scrollbarOpt;
+	private boolean additionalInfo = false;
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((KeyEvent.KEYCODE_BACK == keyCode && additionalInfo) || KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
-                if (!additionalInfo) {
-                    scrollbarOpt = app.ScrollbarTypeOption.getValue();
-                    app.ScrollbarTypeOption.setValue(1);
-                    setFullScreen(false);
-                } else {
-                    app.ScrollbarTypeOption.setValue(scrollbarOpt);
-                    setFullScreen(WindowManager.LayoutParams.FLAG_FULLSCREEN == myFullScreenFlag);
-                }
-                additionalInfo = !additionalInfo;
-                return false;
-        }
+		if ((KeyEvent.KEYCODE_BACK == keyCode && additionalInfo) || KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
+				if (!additionalInfo) {
+					scrollbarOpt = app.ScrollbarTypeOption.getValue();
+					app.ScrollbarTypeOption.setValue(1);
+					setFullScreen(false);
+				} else {
+					app.ScrollbarTypeOption.setValue(scrollbarOpt);
+					setFullScreen(WindowManager.LayoutParams.FLAG_FULLSCREEN == myFullScreenFlag);
+				}
+				additionalInfo = !additionalInfo;
+				return false;
+		}
 		return super.onKeyDown(keyCode, event);
 	}
 
-    public static FBReader getInstance() {
-        return Instance;
-    }
+	public static FBReader getInstance() {
+		return Instance;
+	}
 
-    public void setFullScreen(boolean fullscreen) {
-        WindowManager.LayoutParams attrs = getWindow().getAttributes();
-        if (fullscreen) {
-            attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        } else {
-            attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
-        getWindow().setAttributes(attrs);
-    }
+	public void setFullScreen(boolean fullscreen) {
+		WindowManager.LayoutParams attrs = getWindow().getAttributes();
+		if (fullscreen) {
+			attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+		} else {
+			attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+		getWindow().setAttributes(attrs);
+	}
 
-    public void setBrightness(int delta) {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        int b = 50;
-        if (lp.screenBrightness < 0) {
-            try {
-                b = Math.round(Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS) / (float)255 * (float)100);
-            } catch (Settings.SettingNotFoundException e) { }
-        } else {
-            b = Math.round(lp.screenBrightness * (float)100);
-        }
-        //Log.d("AAA", "b:" + b + " d:" + delta + " mm:" + Math.max(delta, 1-b));
-        if (delta > 0 && b < 100) {
-            b += Math.min(delta, 100 - b);
-        } else if (delta < 0 && b > 1) {
-            b += Math.max(delta, 1 - b);
-        }
-        lp.screenBrightness = (float)b / (float)100;
-        getWindow().setAttributes(lp);
-    }
+	public void setBrightness(int delta) {
+		WindowManager.LayoutParams lp = getWindow().getAttributes();
+		int b = 50;
+		if (lp.screenBrightness < 0) {
+			try {
+				b = Math.round(Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS) / (float)255 * (float)100);
+			} catch (Settings.SettingNotFoundException e) { }
+		} else {
+			b = Math.round(lp.screenBrightness * (float)100);
+		}
+		if (delta > 0 && b < 100) {
+			b += Math.min(delta, 100 - b);
+		} else if (delta < 0 && b > 1) {
+			b += Math.max(delta, 1 - b);
+		}
+		lp.screenBrightness = (float)b / (float)100;
+		getWindow().setAttributes(lp);
+	}
 }
