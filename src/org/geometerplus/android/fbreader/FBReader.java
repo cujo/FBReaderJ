@@ -363,6 +363,9 @@ public final class FBReader extends ZLAndroidActivity {
 		} else {
 			b = Math.round(lp.screenBrightness * (float)100);
 		}
+		if (b < 4) {
+			delta = delta / 3;
+		}
 		if (delta > 0 && b < 100) {
 			b += Math.min(delta, 100 - b);
 		} else if (delta < 0 && b > 1) {
