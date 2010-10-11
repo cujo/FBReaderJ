@@ -343,7 +343,7 @@ public class ZLAndroidWidget extends View {
 							if (myPendingLongClickRunnable != null) {
 								removeCallbacks(myPendingLongClickRunnable);
 							}
-							view.onStylusPress(myPressedX, myPressedY);
+							view.onStylusMovePressed(myPressedX, myPressedY);
 							myPendingPress = false;
 						}
 					}

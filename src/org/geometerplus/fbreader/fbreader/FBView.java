@@ -37,6 +37,7 @@ public final class FBView extends ZLTextView {
 
 	public void setModel(ZLTextModel model) {
 		myIsManualScrollingActive = false;
+		myIsBrightnessChangeActive = false;
 		super.setModel(model);
 	}
 
@@ -98,6 +99,7 @@ public final class FBView extends ZLTextView {
 	private int myStartX;
 	private int myStartY;
 	private boolean myIsManualScrollingActive;
+	private boolean myIsBrightnessChangeActive;
 
 	public boolean onStylusPress(int x, int y) {
 		if (super.onStylusPress(x, y)) {
@@ -116,30 +118,22 @@ public final class FBView extends ZLTextView {
 			return true;
 		}
 
-		myStartX = x;
-		myStartY = y;
-
-		if (x < 20) {
+		if (x < 20 || myIsBrightnessChangeActive) {
 			return false;
 		}
 
 		final ScrollingPreferences preferences = ScrollingPreferences.Instance();
-		if (preferences.FlickOption.getValue()) {
-			setScrollingActive(true);
-			myIsManualScrollingActive = true;
+		if (preferences.HorizontalOption.getValue()) {
+			if (x <= Context.getWidth() / 3) {
+				doScrollPage(false);
+			} else if (x >= Context.getWidth() * 2 / 3) {
+				doScrollPage(true);
+			}
 		} else {
-			if (preferences.HorizontalOption.getValue()) {
-				if (x <= Context.getWidth() / 3) {
-					doScrollPage(false);
-				} else if (x >= Context.getWidth() * 2 / 3) {
-					doScrollPage(true);
-				}
-			} else {
-				if (y <= Context.getHeight() / 3) {
-					doScrollPage(false);
-				} else if (y >= Context.getHeight() * 2 / 3) {
-					doScrollPage(true);
-				}
+			if (y <= Context.getHeight() / 3) {
+				doScrollPage(false);
+			} else if (y >= Context.getHeight() * 2 / 3) {
+				doScrollPage(true);
 			}
 		}
 
@@ -152,16 +146,31 @@ public final class FBView extends ZLTextView {
 			return true;
 		}
 
-		synchronized (this) {
+		// first pressed move passes coordinates where move starts
+		if (!myIsBrightnessChangeActive && !myIsManualScrollingActive) {
 			if (x < 20) {
+				myIsBrightnessChangeActive = true;
+				myStartY = y;
+			} else {
+				final ScrollingPreferences preferences = ScrollingPreferences.Instance();
+				if (preferences.FlickOption.getValue()) {
+					myStartX = x;
+					myStartY = y;
+					myIsManualScrollingActive = true;
+				}
+			}
+			return true;
+		}
+
+		synchronized (this) {
+			if (myIsBrightnessChangeActive) {
 				final int diff = y - myStartY;
-				if (diff > 2) {
-					org.geometerplus.android.fbreader.FBReader.getInstance().setBrightness(-Math.round((float)diff / (float)Context.getHeight() * (float)100));
-				} else if (diff < -2) {
+				if (Math.abs(diff) > 2) {
 					org.geometerplus.android.fbreader.FBReader.getInstance().setBrightness(-Math.round((float)diff / (float)Context.getHeight() * (float)100));
 				}
 				myStartY = y;
-			} else if (isScrollingActive() && myIsManualScrollingActive) {
+			} else if (myIsManualScrollingActive) {
+				setScrollingActive(true);
 				final boolean horizontal = ScrollingPreferences.Instance().HorizontalOption.getValue();
 				final int diff = horizontal ? x - myStartX : y - myStartY;
 				if (diff > 0) {
@@ -196,7 +205,10 @@ public final class FBView extends ZLTextView {
 		}
 
 		synchronized (this) {
-			if (isScrollingActive() && myIsManualScrollingActive) {
+			if (myIsBrightnessChangeActive) {
+				myIsBrightnessChangeActive = false;
+				return true;
+			} else if (isScrollingActive() && myIsManualScrollingActive) {
 				setScrollingActive(false);
 				myIsManualScrollingActive = false;
 				final boolean horizontal = ScrollingPreferences.Instance().HorizontalOption.getValue();
@@ -300,7 +312,7 @@ public final class FBView extends ZLTextView {
 	protected boolean isSelectionEnabled() {
 		return myReader.SelectionEnabledOption.getValue();
 	}
-	
+
 	@Override
 	public int scrollbarType() {
 		return myReader.ScrollbarTypeOption.getValue();
