@@ -33,10 +33,9 @@ import android.content.DialogInterface;
 
 import org.geometerplus.zlibrary.ui.android.R;
 
-import org.geometerplus.zlibrary.ui.android.dialogs.ZLAndroidDialogManager;
+import org.geometerplus.android.util.AndroidUtil;
 
 import org.geometerplus.zlibrary.core.resources.ZLResource;
-import org.geometerplus.zlibrary.core.util.ZLBoolean3;
 import org.geometerplus.zlibrary.core.network.ZLNetworkException;
 
 import org.geometerplus.fbreader.network.NetworkException;
@@ -152,26 +151,22 @@ class RegisterUserDialog extends NetworkDialog {
 		final NetworkAuthenticationManager mgr = myLink.authenticationManager();
 		final Runnable runnable = new Runnable() {
 			public void run() {
+				boolean doRestart = true;
 				try {
 					mgr.registerUser(myLogin, myPassword, myEmail);
+					if (mgr.mayBeAuthorised(true) && mgr.needsInitialization()) {
+						doRestart = false;
+						mgr.initialize();
+					}
 				} catch (ZLNetworkException e) {
 					mgr.logOut();
-					sendError(true, false, e.getMessage());
+					sendError(doRestart, false, e.getMessage());
 					return;
-				}
-				if (mgr.isAuthorised(true).Status != ZLBoolean3.B3_FALSE && mgr.needsInitialization()) {
-					try {
-						mgr.initialize();
-					} catch (ZLNetworkException e) {
-						mgr.logOut();
-						sendError(false, false, e.getMessage());
-						return;
-					}
 				}
 				sendSuccess(false);
 			}
 		};
-		((ZLAndroidDialogManager)ZLAndroidDialogManager.Instance()).wait("registerUser", runnable, myActivity);
+		AndroidUtil.wait("registerUser", runnable, myActivity);
 	}
 
 	@Override

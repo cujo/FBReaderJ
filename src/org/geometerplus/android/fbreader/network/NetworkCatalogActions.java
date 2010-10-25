@@ -32,7 +32,7 @@ import org.geometerplus.zlibrary.core.resources.ZLResource;
 import org.geometerplus.zlibrary.core.util.ZLBoolean3;
 import org.geometerplus.zlibrary.core.network.ZLNetworkException;
 
-import org.geometerplus.zlibrary.ui.android.dialogs.ZLAndroidDialogManager;
+import org.geometerplus.android.util.AndroidUtil;
 
 import org.geometerplus.fbreader.network.*;
 import org.geometerplus.fbreader.network.tree.NetworkTreeFactory;
@@ -85,8 +85,7 @@ class NetworkCatalogActions extends NetworkTreeActions {
 			if (isVisible) {
 				final NetworkAuthenticationManager mgr = item.Link.authenticationManager();
 				if (mgr != null) {
-					final boolean maybeSignedIn = mgr.isAuthorised(false).Status != ZLBoolean3.B3_FALSE;
-					if (maybeSignedIn) {
+					if (mgr.mayBeAuthorised(false)) {
 						addMenuItem(menu, SIGNOUT_ITEM_ID, "signOut", mgr.currentUserName());
 						if (mgr.refillAccountLink() != null) {
 							final String account = mgr.currentAccount();
@@ -183,7 +182,7 @@ class NetworkCatalogActions extends NetworkTreeActions {
 		String account = null;
 		NetworkAuthenticationManager mgr = item.Link.authenticationManager();
 		if (mgr != null) {
-			if (mgr.isAuthorised(false).Status != ZLBoolean3.B3_FALSE) {
+			if (mgr.mayBeAuthorised(false)) {
 				userName = mgr.currentUserName();
 				signOut = true;
 				account = mgr.currentAccount();
@@ -367,11 +366,7 @@ class NetworkCatalogActions extends NetworkTreeActions {
 			final INetworkLink link = myTree.Item.Link;
 			if (myCheckAuthentication && link.authenticationManager() != null) {
 				final NetworkAuthenticationManager mgr = link.authenticationManager();
-				final AuthenticationStatus auth = mgr.isAuthorised(true);
-				if (auth.Exception != null) {
-					throw auth.Exception;
-				}
-				if (auth.Status == ZLBoolean3.B3_TRUE && mgr.needsInitialization()) {
+				if (mgr.isAuthorised(true) && mgr.needsInitialization()) {
 					try {
 						mgr.initialize();
 					} catch (ZLNetworkException e) {
@@ -457,13 +452,13 @@ class NetworkCatalogActions extends NetworkTreeActions {
 		final NetworkAuthenticationManager mgr = tree.Item.Link.authenticationManager();
 		final Runnable runnable = new Runnable() {
 			public void run() {
-				if (mgr.isAuthorised(false).Status != ZLBoolean3.B3_FALSE) {
+				if (mgr.mayBeAuthorised(false)) {
 					mgr.logOut();
 					handler.sendEmptyMessage(0);
 				}
 			}
 		};
-		((ZLAndroidDialogManager)ZLAndroidDialogManager.Instance()).wait("signOut", runnable, activity);
+		AndroidUtil.wait("signOut", runnable, activity);
 	}
 
 	private void removeCustomLink(ICustomNetworkLink link) {

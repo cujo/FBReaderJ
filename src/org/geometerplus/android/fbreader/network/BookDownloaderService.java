@@ -42,9 +42,9 @@ import org.geometerplus.zlibrary.core.network.*;
 
 import org.geometerplus.fbreader.network.BookReference;
 
+import org.geometerplus.android.fbreader.FBReader;
 
 public class BookDownloaderService extends Service {
-
 	public static final String BOOK_FORMAT_KEY = "org.geometerplus.android.fbreader.network.BookFormat";
 	public static final String REFERENCE_TYPE_KEY = "org.geometerplus.android.fbreader.network.ReferenceType";
 	public static final String CLEAN_URL_KEY = "org.geometerplus.android.fbreader.network.CleanURL";
@@ -191,7 +191,7 @@ public class BookDownloaderService extends Service {
 	}
 
 	private Intent getFBReaderIntent(final File file) {
-		final Intent intent = new Intent(getApplicationContext(), org.geometerplus.android.fbreader.FBReader.class);
+		final Intent intent = new Intent(getApplicationContext(), FBReader.class);
 		if (file != null) {
 			intent.setAction(Intent.ACTION_VIEW).setData(Uri.fromFile(file));
 		}
@@ -332,14 +332,16 @@ public class BookDownloaderService extends Service {
 
 		final Thread downloader = new Thread(new Runnable() {
 			public void run() {
+				boolean success = false;
 				try {
 					ZLNetworkManager.Instance().perform(request);
+					success = true;
 				} catch (ZLNetworkException e) {
 					// TODO: show error message to User
 					file.delete();
-					downloadFinishHandler.sendEmptyMessage(0);
+				} finally {
+					downloadFinishHandler.sendEmptyMessage(success ? 1 : 0);
 				}
-				downloadFinishHandler.sendEmptyMessage(1);
 			}
 		});
 		downloader.setPriority(Thread.MIN_PRIORITY);

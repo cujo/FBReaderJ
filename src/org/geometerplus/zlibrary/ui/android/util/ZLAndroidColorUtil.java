@@ -17,20 +17,14 @@
  * 02110-1301, USA.
  */
 
-package org.geometerplus.fbreader.fbreader;
+package org.geometerplus.zlibrary.ui.android.util;
 
-import org.geometerplus.android.fbreader.network.NetworkLibraryActivity;
+import android.graphics.Color;
 
-import org.geometerplus.zlibrary.ui.android.dialogs.ZLAndroidDialogManager;
+import org.geometerplus.zlibrary.core.util.ZLColor;
 
-class ShowNetworkLibraryAction extends FBAction {
-	ShowNetworkLibraryAction(FBReader fbreader) {
-		super(fbreader);
-	}
-
-	public void run() {
-		final ZLAndroidDialogManager dialogManager =
-			(ZLAndroidDialogManager)ZLAndroidDialogManager.Instance();
-		dialogManager.runActivity(NetworkLibraryActivity.class);
+public abstract class ZLAndroidColorUtil {
+	public static int rgb(ZLColor color) {
+		return Color.rgb(color.Red, color.Green, color.Blue);
 	}
 }
