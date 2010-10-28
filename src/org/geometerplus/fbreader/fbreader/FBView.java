@@ -132,15 +132,15 @@ public final class FBView extends ZLTextView {
 
 		final ScrollingPreferences preferences = ScrollingPreferences.Instance();
 		if (preferences.HorizontalOption.getValue()) {
-			if (x <= Context.getWidth() / 3) {
+			if (x <= myContext.getWidth() / 3) {
 				doScrollPage(false);
-			} else if (x >= Context.getWidth() * 2 / 3) {
+			} else if (x >= myContext.getWidth() * 2 / 3) {
 				doScrollPage(true);
 			}
 		} else {
-			if (y <= Context.getHeight() / 3) {
+			if (y <= myContext.getHeight() / 3) {
 				doScrollPage(false);
-			} else if (y >= Context.getHeight() * 2 / 3) {
+			} else if (y >= myContext.getHeight() * 2 / 3) {
 				doScrollPage(true);
 			}
 		}
@@ -173,7 +173,7 @@ public final class FBView extends ZLTextView {
 			if (myIsBrightnessChangeActive) {
 				final int diff = y - myStartY;
 				if (Math.abs(diff) > 2) {
-					myReader.setBrightness(-Math.round((float)diff / (float)Context.getHeight() * (float)100));
+					org.geometerplus.android.fbreader.FBReader.getInstance().setBrightness(-Math.round((float)diff / (float)myContext.getHeight() * (float)100));
 				}
 				myStartY = y;
 			} else if (myIsManualScrollingActive) {

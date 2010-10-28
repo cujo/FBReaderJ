@@ -322,7 +322,7 @@ public final class FBReader extends ZLAndroidActivity {
 		if ((KeyEvent.KEYCODE_BACK == keyCode && additionalInfo) || KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
                 final FBReaderApp fbreader = (FBReaderApp)ZLApplication.Instance();
 				if (!additionalInfo) {
-					scrollbarOpt = app.ScrollbarTypeOption.getValue();
+					scrollbarOpt = fbreader.ScrollbarTypeOption.getValue();
 					fbreader.ScrollbarTypeOption.setValue(1);
 					setFullScreen(false);
 				} else {
