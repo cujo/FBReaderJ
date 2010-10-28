@@ -113,7 +113,7 @@ public final class FBView extends ZLTextView {
 		}
 
 		if (myReader.FooterIsSensitive.getValue()) {
-			Footer footer = (Footer)getFooterArea();
+			Footer footer = getFooterArea();
 			if (footer != null && y > myContext.getHeight() - footer.getTapHeight()) {
 				footer.setProgress(x);
 				return true;
@@ -317,6 +317,12 @@ public final class FBView extends ZLTextView {
 	}
 
 	private class Footer implements FooterArea {
+		private Runnable UpdateTask = new Runnable() {
+			public void run() {
+				ZLApplication.Instance().repaintView();
+			}
+		};
+
 		public int getHeight() {
 			return myReader.FooterHeightOption.getValue();
 		}
@@ -409,16 +415,18 @@ public final class FBView extends ZLTextView {
 		}
 	}
 
-	private FooterArea myFooter;
+	private Footer myFooter;
 
 	@Override
-	public FooterArea getFooterArea() {
+	public Footer getFooterArea() {
 		if (myReader.ScrollbarTypeOption.getValue() == SCROLLBAR_SHOW_AS_FOOTER) {
 			if (myFooter == null) {
 				myFooter = new Footer();
+				ZLApplication.Instance().addTimerTask(myFooter.UpdateTask, 15000);
 			}
 		} else {
 			if (myFooter != null) {
+				ZLApplication.Instance().removeTimerTask(myFooter.UpdateTask);
 				myFooter = null;
 			}
 		}
