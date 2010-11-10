@@ -116,8 +116,8 @@ public final class FBView extends ZLTextView {
 
 		final ZLTextHyperlink hyperlink = findHyperlink(x, y, 10);
 		if (hyperlink != null) {
-			selectHyperlink(hyperlink);
-			myReader.repaintView();
+			//selectHyperlink(hyperlink);
+			//myReader.repaintView();
 			followHyperlink(hyperlink);
 			return true;
 		}
