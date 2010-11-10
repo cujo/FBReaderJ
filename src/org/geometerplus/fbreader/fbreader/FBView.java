@@ -61,6 +61,8 @@ public final class FBView extends ZLTextView {
 					!cursor.isNull() &&
 					(!cursor.isEndOfParagraph() || !cursor.getParagraphCursor().isLast())) {
 					startAutoScrolling(preferences.HorizontalOption.getValue() ? PAGE_RIGHT : PAGE_BOTTOM);
+  				} else if (myReader.getCurrentView() != myReader.BookTextView) {
+					myReader.showBookTextView();
 				}
 			} else {
 				ZLTextWordCursor cursor = getStartCursor();
@@ -68,6 +70,8 @@ public final class FBView extends ZLTextView {
 					!cursor.isNull() &&
 					(!cursor.isStartOfParagraph() || !cursor.getParagraphCursor().isFirst())) {
 					startAutoScrolling(preferences.HorizontalOption.getValue() ? PAGE_LEFT : PAGE_TOP);
+  				} else if (myReader.getCurrentView() != myReader.BookTextView) {
+					myReader.showBookTextView();
 				}
 			}
 		} else {
