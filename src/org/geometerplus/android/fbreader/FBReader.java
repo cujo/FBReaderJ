@@ -24,10 +24,8 @@ import java.util.LinkedList;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -50,6 +48,8 @@ import org.geometerplus.fbreader.fbreader.ActionCode;
 import org.geometerplus.fbreader.library.Library;
 
 public final class FBReader extends ZLAndroidActivity {
+	final static int REPAINT_CODE = 1;
+
 	static FBReader Instance;
 
 	private int myFullScreenFlag;
@@ -111,8 +111,8 @@ public final class FBReader extends ZLAndroidActivity {
 
 		final FBReaderApp fbReader = (FBReaderApp)ZLApplication.Instance();
 		fbReader.addAction(ActionCode.SHOW_LIBRARY, new ShowLibraryAction(this, fbReader));
-		fbReader.addAction(ActionCode.SHOW_PREFERENCES, new PreferencesAction(this, fbReader));
-		fbReader.addAction(ActionCode.SHOW_BOOK_INFO, new BookInfoAction(this, fbReader));
+		fbReader.addAction(ActionCode.SHOW_PREFERENCES, new ShowPreferencesAction(this, fbReader));
+		fbReader.addAction(ActionCode.SHOW_BOOK_INFO, new ShowBookInfoAction(this, fbReader));
 		fbReader.addAction(ActionCode.SHOW_CONTENTS, new ShowTOCAction(this, fbReader));
 		fbReader.addAction(ActionCode.SHOW_BOOKMARKS, new ShowBookmarksAction(this, fbReader));
 		fbReader.addAction(ActionCode.SHOW_NETWORK_LIBRARY, new ShowNetworkLibraryAction(this, fbReader));
@@ -177,10 +177,6 @@ public final class FBReader extends ZLAndroidActivity {
 	@Override
 	public void onStop() {
 		ControlButtonPanel.removeControlPanels();
-		if (additionalInfo) {
-            final FBReaderApp fbreader = (FBReaderApp)ZLApplication.Instance();
-			fbreader.ScrollbarTypeOption.setValue(scrollbarOpt);
-		}
 		super.onStop();
 	}
 
@@ -194,8 +190,7 @@ public final class FBReader extends ZLAndroidActivity {
 
 	protected ZLApplication createApplication(String fileName) {
 		new SQLiteBooksDatabase();
-		final String[] args = (fileName != null) ? new String[] { fileName } : new String[0];
-		return new FBReaderApp(args);
+		return new FBReaderApp(fileName);
 	}
 
 	@Override
@@ -213,6 +208,19 @@ public final class FBReader extends ZLAndroidActivity {
 		final FBReaderApp fbreader = (FBReaderApp)ZLApplication.Instance();
 		startSearch(fbreader.TextSearchPatternOption.getValue(), true, null, false);
 		return true;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case REPAINT_CODE:
+			{
+				final FBReaderApp fbreader = (FBReaderApp)ZLApplication.Instance();
+				fbreader.clearTextCaches();
+				fbreader.repaintView();
+				break;
+			}
+		}
 	}
 
 	public void navigate() {
@@ -295,61 +303,5 @@ public final class FBReader extends ZLAndroidActivity {
 
 	private static String makeProgressText(int page, int pagesNumber) {
 		return "" + page + " / " + pagesNumber;
-	}
-
-	private int scrollbarOpt;
-	private boolean additionalInfo = false;
-
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if ((KeyEvent.KEYCODE_BACK == keyCode && additionalInfo) || KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
-                final FBReaderApp fbreader = (FBReaderApp)ZLApplication.Instance();
-				if (!additionalInfo) {
-					scrollbarOpt = fbreader.ScrollbarTypeOption.getValue();
-					fbreader.ScrollbarTypeOption.setValue(1);
-					setFullScreen(false);
-				} else {
-					fbreader.ScrollbarTypeOption.setValue(scrollbarOpt);
-					setFullScreen(WindowManager.LayoutParams.FLAG_FULLSCREEN == myFullScreenFlag);
-				}
-				additionalInfo = !additionalInfo;
-				return false;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
-
-	public static FBReader getInstance() {
-		return Instance;
-	}
-
-	public void setFullScreen(boolean fullscreen) {
-		WindowManager.LayoutParams attrs = getWindow().getAttributes();
-		if (fullscreen) {
-			attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-		} else {
-			attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		}
-		getWindow().setAttributes(attrs);
-	}
-
-	public void setBrightness(int delta) {
-		WindowManager.LayoutParams lp = getWindow().getAttributes();
-		int b = 50;
-		if (lp.screenBrightness < 0) {
-			try {
-				b = Math.round(Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS) / (float)255 * (float)100);
-			} catch (Settings.SettingNotFoundException e) { }
-		} else {
-			b = Math.round(lp.screenBrightness * (float)100);
-		}
-		if (b < 4) {
-			delta = delta / 3;
-		}
-		if (delta > 0 && b < 100) {
-			b += Math.min(delta, 100 - b);
-		} else if (delta < 0 && b > 1) {
-			b += Math.max(delta, 1 - b);
-		}
-		lp.screenBrightness = (float)b / (float)100;
-		getWindow().setAttributes(lp);
 	}
 }

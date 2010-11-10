@@ -22,8 +22,15 @@ package org.geometerplus.android.fbreader.preferences;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
 
+import org.geometerplus.zlibrary.core.options.ZLIntegerRangeOption;
+import org.geometerplus.zlibrary.core.dialogs.ZLOptionsDialog;
+
+import org.geometerplus.zlibrary.text.view.style.ZLTextStyleCollection;
+import org.geometerplus.zlibrary.text.view.style.ZLTextBaseStyle;
+
 import org.geometerplus.zlibrary.ui.android.library.ZLAndroidApplication;
 
+import org.geometerplus.fbreader.optionsDialog.OptionsDialog;
 import org.geometerplus.fbreader.fbreader.*;
 import org.geometerplus.fbreader.Paths;
 
@@ -66,63 +73,157 @@ public class PreferenceActivity extends ZLPreferenceActivity {
 	protected void init() {
 		final Category libraryCategory = createCategory("Library");
 		libraryCategory.addPreference(new ZLStringOptionPreference(
-			this,
-			Paths.BooksDirectoryOption,
-			libraryCategory.Resource,
-			"path")
-		);
+			this, Paths.BooksDirectoryOption,
+			libraryCategory.Resource, "path"
+		));
 
 		final Category lookNFeelCategory = createCategory("LookNFeel");
 
 		final FBReaderApp fbReader = (FBReaderApp)FBReaderApp.Instance();
+		final ZLAndroidApplication androidApp = ZLAndroidApplication.Instance();
+
+		final Screen marginsScreen = lookNFeelCategory.createPreferenceScreen("margins");
+		final Category marginsCategory = marginsScreen.createCategory(null);
+		marginsCategory.addPreference(new ZLIntegerRangePreference(
+			this, marginsCategory.Resource.getResource("left"),
+			fbReader.LeftMarginOption
+		));
+		marginsCategory.addPreference(new ZLIntegerRangePreference(
+			this, marginsCategory.Resource.getResource("right"),
+			fbReader.RightMarginOption
+		));
+		marginsCategory.addPreference(new ZLIntegerRangePreference(
+			this, marginsCategory.Resource.getResource("top"),
+			fbReader.TopMarginOption
+		));
+		marginsCategory.addPreference(new ZLIntegerRangePreference(
+			this, marginsCategory.Resource.getResource("bottom"),
+			fbReader.BottomMarginOption
+		));
 
 		final Screen appearanceScreen = lookNFeelCategory.createPreferenceScreen("appearanceSettings");
-		appearanceScreen.setSummary( appearanceScreen.Resource.getResource("summary").getValue() );
-		appearanceScreen.setOnPreferenceClickListener(
+		final Category appearanceCategory = appearanceScreen.createCategory(null);
+		final ZLTextStyleCollection collection = ZLTextStyleCollection.Instance();
+		final ZLTextBaseStyle baseStyle = collection.getBaseStyle();
+		appearanceCategory.addPreference(new FontOption(
+			this, appearanceCategory.Resource, "font",
+			baseStyle.FontFamilyOption
+		));
+		appearanceCategory.addPreference(new ZLIntegerRangePreference(
+			this, appearanceCategory.Resource.getResource("fontSize"),
+			baseStyle.FontSizeOption
+		));
+		appearanceCategory.addPreference(new ZLBooleanPreference(
+			this, baseStyle.BoldOption,
+			appearanceCategory.Resource, "bold"
+		));
+		appearanceCategory.addPreference(new ZLBooleanPreference(
+			this, baseStyle.ItalicOption,
+			appearanceCategory.Resource, "italic"
+		));
+		final ZLIntegerRangeOption spaceOption = baseStyle.LineSpaceOption;
+		final String[] spacings = new String[spaceOption.MaxValue - spaceOption.MinValue + 1];
+		for (int i = 0; i < spacings.length; ++i) {
+			final int val = spaceOption.MinValue + i;
+			spacings[i] = (char)(val / 10 + '0') + "." + (char)(val % 10 + '0');
+		}
+		appearanceCategory.addPreference(new ZLChoicePreference(
+			this, appearanceCategory.Resource, "lineSpacing",
+			baseStyle.LineSpaceOption, spacings
+		));
+		String[] alignments = { "left", "right", "center", "justify" };
+		appearanceCategory.addPreference(new ZLChoicePreference(
+			this, appearanceCategory.Resource, "alignment",
+			baseStyle.AlignmentOption, alignments
+		));
+		appearanceCategory.addPreference(new ZLBooleanPreference(
+			this, baseStyle.AutoHyphenationOption,
+			appearanceCategory.Resource, "autoHyphenations"
+		));
+
+		final ZLOptionsDialog dlg = new OptionsDialog(fbReader).getDialog();
+		final Screen formatScreen = appearanceCategory.createPreferenceScreen("format");
+		final Screen stylesScreen = appearanceCategory.createPreferenceScreen("styles");
+		final Screen colorsScreen = appearanceCategory.createPreferenceScreen("colors");
+		formatScreen.setOnPreferenceClickListener(
 				new PreferenceScreen.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference preference) {
-						fbReader.showOptionsDialog();
+						dlg.run(0);
+						return true;
+					}
+				}
+		);
+		stylesScreen.setOnPreferenceClickListener(
+				new PreferenceScreen.OnPreferenceClickListener() {
+					public boolean onPreferenceClick(Preference preference) {
+						dlg.run(1);
+						return true;
+					}
+				}
+		);
+		colorsScreen.setOnPreferenceClickListener(
+				new PreferenceScreen.OnPreferenceClickListener() {
+					public boolean onPreferenceClick(Preference preference) {
+						dlg.run(2);
 						return true;
 					}
 				}
 		);
 
 		final Screen statusLineScreen = lookNFeelCategory.createPreferenceScreen("scrollBar");
-		statusLineScreen.setSummary(statusLineScreen.Resource.getResource("summary").getValue());
 		final Category statusLineCategory = statusLineScreen.createCategory(null);
 
 		String[] scrollBarTypes = {"hide", "show", "showAsProgress", "showAsFooter"};
 		statusLineCategory.addPreference(new ZLChoicePreference(
 			this, statusLineCategory.Resource, "scrollbarType",
-			fbReader.ScrollbarTypeOption, scrollBarTypes));
+			fbReader.ScrollbarTypeOption, scrollBarTypes
+		));
 
 		statusLineCategory.addPreference(new ZLIntegerRangePreference(
 			this, statusLineCategory.Resource.getResource("footerHeight"),
-			fbReader.FooterHeightOption)
-		);
+			fbReader.FooterHeightOption
+		));
 
 		/*
 		String[] footerLongTaps = {"longTapRevert", "longTapNavigate"};
 		statusLineCategory.addPreference(new ZLChoicePreference(
 			this, statusLineCategory.Resource, "footerLongTap",
-			fbReader.FooterLongTap, footerLongTaps));
+			fbReader.FooterLongTapOption, footerLongTaps
+		));
 		*/
 
-		statusLineCategory.addOption(fbReader.FooterShowClock, "showClock");
-		statusLineCategory.addOption(fbReader.FooterShowBattery, "showBattery");
-		statusLineCategory.addOption(fbReader.FooterShowProgress, "showProgress");
-		statusLineCategory.addOption(fbReader.FooterIsSensitive, "isSensitive");
+		statusLineCategory.addOption(fbReader.FooterShowClockOption, "showClock");
+		statusLineCategory.addOption(fbReader.FooterShowBatteryOption, "showBattery");
+		statusLineCategory.addOption(fbReader.FooterShowProgressOption, "showProgress");
+		statusLineCategory.addOption(fbReader.FooterIsSensitiveOption, "isSensitive");
+		statusLineCategory.addPreference(new FontOption(
+			this, statusLineCategory.Resource, "font",
+			fbReader.FooterFontOption
+		));
 
-		lookNFeelCategory.addOption(ZLAndroidApplication.Instance().AutoOrientationOption, "autoOrientation");
-		if (!ZLAndroidApplication.Instance().isAlwaysShowStatusBar()) {
-			lookNFeelCategory.addOption(ZLAndroidApplication.Instance().ShowStatusBarOption, "showStatusBar");
+		lookNFeelCategory.addOption(androidApp.AutoOrientationOption, "autoOrientation");
+		if (!androidApp.isAlwaysShowStatusBar()) {
+			lookNFeelCategory.addOption(androidApp.ShowStatusBarOption, "showStatusBar");
 		}
 		lookNFeelCategory.addPreference(new BatteryLevelToTurnScreenOffPreference(
 			this,
-			ZLAndroidApplication.Instance().BatteryLevelToTurnScreenOffOption,
+			androidApp.BatteryLevelToTurnScreenOffOption,
 			lookNFeelCategory.Resource,
 			"dontTurnScreenOff"
 		));
+		lookNFeelCategory.addPreference(new ZLBooleanPreference(
+			this,
+			fbReader.AllowScreenBrightnessAdjustmentOption,
+			lookNFeelCategory.Resource,
+			"allowScreenBrightnessAdjustment"
+		) {
+			public void onAccept() {
+				super.onAccept();
+				if (!isChecked()) {
+					androidApp.ScreenBrightnessLevelOption.setValue(0);
+				}
+			}
+		});
 
 		/*
 		final Screen colorProfileScreen = lookNFeelCategory.createPreferenceScreen("colorProfile");
