@@ -19,42 +19,32 @@
 
 package org.geometerplus.android.fbreader.preferences;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 
-import org.geometerplus.zlibrary.core.options.ZLStringOption;
+import org.geometerplus.zlibrary.core.options.ZLBooleanOption;
 import org.geometerplus.zlibrary.core.resources.ZLResource;
 
-import org.geometerplus.zlibrary.ui.android.view.AndroidFontUtil;
+class FontStylePreference extends ZLStringListPreference {
+	private final ZLBooleanOption myBoldOption;
+	private final ZLBooleanOption myItalicOption;
+	private final String[] myValues = { "regular", "bold", "italic", "boldItalic" };
 
-class FontOption extends ZLStringListPreference {
-	private final ZLStringOption myOption;
-
-	FontOption(Context context, ZLResource resource, String resourceKey, ZLStringOption option) {
+	FontStylePreference(Context context, ZLResource resource, String resourceKey, ZLBooleanOption boldOption, ZLBooleanOption italicOption) {
 		super(context, resource, resourceKey);
 
-		myOption = option;
-		final ArrayList<String> fonts = new ArrayList<String>();
-		AndroidFontUtil.fillFamiliesList(fonts, true);
-		setList((String[])fonts.toArray(new String[fonts.size()]));
+		myBoldOption = boldOption;
+		myItalicOption = italicOption;
+		setList(myValues);
 
-		final String initialValue = AndroidFontUtil.realFontFamilyName(option.getValue());
-		for (String fontName : fonts) {
-			if (initialValue.equals(fontName)) {
-				setInitialValue(fontName);
-				return;
-			}
-		}
-		for (String fontName : fonts) {
-			if (initialValue.equals(AndroidFontUtil.realFontFamilyName(fontName))) {
-				setInitialValue(fontName);
-				return;
-			}
-		}
+		final int intValue =
+			(boldOption.getValue() ? 1 : 0) |
+			(italicOption.getValue() ? 2 : 0);
+		setInitialValue(myValues[intValue]);
 	}
 
 	public void onAccept() {
-		myOption.setValue(getValue());
+		final int intValue = findIndexOfValue(getValue());
+		myBoldOption.setValue((intValue & 0x1) == 0x1);
+		myItalicOption.setValue((intValue & 0x2) == 0x2);
 	}
 }
