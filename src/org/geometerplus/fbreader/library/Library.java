@@ -150,13 +150,16 @@ public final class Library {
 
 		FileInfoSet fileInfos = new FileInfoSet();
 
-		final Map<Long,Book> savedBooks = BooksDatabase.Instance().listBooks(fileInfos);
+		final Map<Long,Book> savedBooks = BooksDatabase.Instance().loadBooks(fileInfos);
 
 		for (ZLPhysicalFile file : physicalFilesList) {
 			collectBooks(file, fileInfos, savedBooks, !fileInfos.check(file));
 			file.setCached(false);
 		}
-		myBooks.add(getBook(getHelpFile(), fileInfos, savedBooks, false));
+		final Book helpBook = getBook(getHelpFile(), fileInfos, savedBooks, false);
+		if (helpBook != null) {
+			myBooks.add(helpBook);
+		}
 
 		collectExternalBooks(fileInfos, savedBooks);
 
@@ -251,7 +254,7 @@ public final class Library {
 		}
 
 		final BooksDatabase db = BooksDatabase.Instance();
-		for (long id : db.listRecentBookIds()) {
+		for (long id : db.loadRecentBookIds()) {
 			Book book = bookById.get(id);
 			if (book != null) {
 				myRecentBooks.createBookSubTree(book, true);
@@ -295,7 +298,7 @@ public final class Library {
 	}
 
 	public static Book getRecentBook() {
-		List<Long> recentIds = BooksDatabase.Instance().listRecentBookIds();
+		List<Long> recentIds = BooksDatabase.Instance().loadRecentBookIds();
 		return (recentIds.size() > 0) ? Book.getById(recentIds.get(0)) : null;
 	}
 
@@ -316,7 +319,7 @@ public final class Library {
 
 	public static void addBookToRecentList(Book book) {
 		final BooksDatabase db = BooksDatabase.Instance();
-		final List<Long> ids = db.listRecentBookIds();
+		final List<Long> ids = db.loadRecentBookIds();
 		final Long bookId = book.getId();
 		ids.remove(bookId);
 		ids.add(0, bookId);
@@ -361,7 +364,7 @@ public final class Library {
 		myLibraryByTag.removeBook(book);
 		if (myRecentBooks.removeBook(book)) {
 			final BooksDatabase db = BooksDatabase.Instance();
-			final List<Long> ids = db.listRecentBookIds();
+			final List<Long> ids = db.loadRecentBookIds();
 			ids.remove(book.getId());
 			db.saveRecentBookIds(ids);
 		}
