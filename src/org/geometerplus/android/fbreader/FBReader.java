@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -177,6 +178,10 @@ public final class FBReader extends ZLAndroidActivity {
 	@Override
 	public void onStop() {
 		ControlButtonPanel.removeControlPanels();
+		if (additionalInfo) {
+			final FBReaderApp fbreader = (FBReaderApp)ZLApplication.Instance();
+			fbreader.ScrollbarTypeOption.setValue(scrollbarOpt);
+		}
 		super.onStop();
 	}
 
@@ -303,5 +308,35 @@ public final class FBReader extends ZLAndroidActivity {
 
 	private static String makeProgressText(int page, int pagesNumber) {
 		return "" + page + " / " + pagesNumber;
+	}
+
+	private int scrollbarOpt;
+	private boolean additionalInfo = false;
+
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if ((KeyEvent.KEYCODE_BACK == keyCode && additionalInfo) || KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
+				final FBReaderApp fbreader = (FBReaderApp)ZLApplication.Instance();
+				if (!additionalInfo) {
+					scrollbarOpt = fbreader.ScrollbarTypeOption.getValue();
+					fbreader.ScrollbarTypeOption.setValue(1);
+					setFullScreen(false);
+				} else {
+					fbreader.ScrollbarTypeOption.setValue(scrollbarOpt);
+					setFullScreen(WindowManager.LayoutParams.FLAG_FULLSCREEN == myFullScreenFlag);
+				}
+				additionalInfo = !additionalInfo;
+				return false;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	public void setFullScreen(boolean fullscreen) {
+		WindowManager.LayoutParams attrs = getWindow().getAttributes();
+		if (fullscreen) {
+			attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+		} else {
+			attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+		getWindow().setAttributes(attrs);
 	}
 }
