@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2010 Geometer Plus <contact@geometerplus.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,22 @@
  * 02110-1301, USA.
  */
 
-package org.geometerplus.zlibrary.ui.android.dialogs;
+package org.geometerplus.android.fbreader.preferences;
 
-import android.app.Activity;
-import android.os.Bundle;
+import java.util.LinkedList;
 
-import org.geometerplus.zlibrary.ui.android.library.ZLAndroidApplication;
+import android.preference.Preference;
 
-public class DialogActivity extends Activity {
-	static final Object DIALOG_KEY = new Object();
+class ZLPreferenceSet {
+	private final LinkedList<ZLPreference> myPreferences = new LinkedList<ZLPreference>();
 
-	private ZLAndroidDialogInterface myDialog;
-
-	protected void onCreate(Bundle bundle) {
-		super.onCreate(bundle);
-		final ZLAndroidApplication application = (ZLAndroidApplication)getApplication();
-		myDialog = (ZLAndroidDialogInterface)application.getData(DIALOG_KEY);
-		myDialog.setActivity(this);
+	final void add(ZLPreference preference) {
+		myPreferences.add(preference);
 	}
 
-	protected void onDestroy() {
-		myDialog.endActivity();
-		super.onDestroy();
+	final void setEnabled(boolean enable) {
+		for (ZLPreference preference : myPreferences) {
+			((Preference)preference).setEnabled(enable);
+		}
 	}
 }
