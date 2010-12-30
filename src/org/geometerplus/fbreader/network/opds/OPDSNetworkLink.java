@@ -21,8 +21,10 @@ package org.geometerplus.fbreader.network.opds;
 
 import java.util.*;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.geometerplus.zlibrary.core.util.ZLMiscUtil;
 import org.geometerplus.zlibrary.core.util.ZLNetworkUtil;
@@ -44,7 +46,8 @@ class OPDSNetworkLink extends AbstractNetworkLink {
 	private TreeMap<RelationAlias, String> myRelationAliases;
 
 	private TreeMap<String, Integer> myUrlConditions;
-	private LinkedList<URLRewritingRule> myUrlRewritingRules;
+	private final LinkedList<URLRewritingRule> myUrlRewritingRules = new LinkedList<URLRewritingRule>();
+	private final Map<String,String> myExtraData = new HashMap<String,String>();
 	private NetworkAuthenticationManager myAuthenticationManager;
 
 	private final boolean myHasStableIdentifiers;
@@ -72,11 +75,13 @@ class OPDSNetworkLink extends AbstractNetworkLink {
 	}
 
 	final void setUrlRewritingRules(List<URLRewritingRule> rules) {
-		if (rules != null && rules.size() > 0) {
-			myUrlRewritingRules = new LinkedList<URLRewritingRule>(rules);
-		} else {
-			myUrlRewritingRules = null;
-		}
+		myUrlRewritingRules.clear();
+		myUrlRewritingRules.addAll(rules);
+	}
+
+	final void setExtraData(Map<String,String> extraData) {
+		myExtraData.clear();
+		myExtraData.putAll(extraData);
 	}
 
 	final void setAuthenticationManager(NetworkAuthenticationManager mgr) {
@@ -115,10 +120,6 @@ class OPDSNetworkLink extends AbstractNetworkLink {
 		};
 	}
 
-	private final String searchURL(String query) {
-		return getLink(URL_SEARCH).replace("%s", query);
-	}
-
 	@Override
 	public OPDSCatalogItem.State createOperationData(INetworkLink link,
 			NetworkOperationData.OnNewItemListener listener) {
@@ -126,23 +127,25 @@ class OPDSNetworkLink extends AbstractNetworkLink {
 	}
 
 	public ZLNetworkRequest simpleSearchRequest(String pattern, NetworkOperationData data) {
-		if (getLink(URL_SEARCH) == null) {
+		final String url = getLink(URL_SEARCH);
+		if (url == null) {
 			return null;
 		}
-		return createNetworkData(
-			searchURL(ZLNetworkUtil.htmlEncode(pattern)),
-			(OPDSCatalogItem.State) data
-		);
+		try {
+			pattern = URLEncoder.encode(pattern, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+		}
+		return createNetworkData(url.replace("%s", pattern), (OPDSCatalogItem.State)data);
 	}
 
 	public ZLNetworkRequest resume(NetworkOperationData data) {
 		return createNetworkData(data.ResumeURI, (OPDSCatalogItem.State) data);
 	}
 
-	public NetworkLibraryItem libraryItem() {
+	public NetworkCatalogItem libraryItem() {
 		TreeMap<Integer, String> urlMap = new TreeMap<Integer, String>();
 		urlMap.put(NetworkCatalogItem.URL_CATALOG, getLink(URL_MAIN));
-		return new OPDSCatalogItem(this, getTitle(), getSummary(), getIcon(), urlMap);
+		return new OPDSCatalogItem(this, getTitle(), getSummary(), getIcon(), urlMap, myExtraData);
 	}
 
 	public NetworkAuthenticationManager authenticationManager() {
@@ -150,9 +153,6 @@ class OPDSNetworkLink extends AbstractNetworkLink {
 	}
 
 	public String rewriteUrl(String url, boolean isUrlExternal) {
-		if (myUrlRewritingRules == null) {
-			return url;
-		}
 		for (URLRewritingRule rule: myUrlRewritingRules) {
 			if (rule.Apply != URLRewritingRule.APPLY_ALWAYS) {
 				if ((rule.Apply == URLRewritingRule.APPLY_EXTERNAL && !isUrlExternal)

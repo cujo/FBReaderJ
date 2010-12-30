@@ -44,14 +44,6 @@ public final class FBView extends ZLTextView {
 		super.setModel(model);
 	}
 
-	final void doShortScroll(boolean forward) {
-		if (!moveHyperlinkPointer(forward)) {
-			scrollPage(forward, ZLTextView.ScrollingMode.SCROLL_LINES, 1);
-		}
-
-		myReader.repaintView();
-	}
-
 	public void onScrollingFinished(int viewPage) {
 		super.onScrollingFinished(viewPage);
 	}
@@ -84,17 +76,6 @@ public final class FBView extends ZLTextView {
 		}
 	}
 
-	void followHyperlink(ZLTextHyperlink hyperlink) {
-		switch (hyperlink.Type) {
-			case FBHyperlinkType.EXTERNAL:
-				ZLibrary.Instance().openInBrowser(hyperlink.Id);
-				break;
-			case FBHyperlinkType.INTERNAL:
-				myReader.tryOpenFootnote(hyperlink.Id);
-				break;
-		}
-	}
-
 	private int myStartX;
 	private int myStartY;
 	private boolean myIsManualScrollingActive;
@@ -121,8 +102,9 @@ public final class FBView extends ZLTextView {
 		final ZLTextHyperlink hyperlink = findHyperlink(x, y, 10);
 		if (hyperlink != null) {
 			//selectHyperlink(hyperlink);
-			//myReader.repaintView();
-			followHyperlink(hyperlink);
+			myReader.repaintView();
+			myReader.doAction(ActionCode.PROCESS_HYPERLINK);
+			//followHyperlink(hyperlink);
 			return true;
 		}
 
@@ -256,12 +238,30 @@ public final class FBView extends ZLTextView {
 	}
 
 	public boolean onTrackballRotated(int diffX, int diffY) {
-		if (diffY > 0) {
-			myReader.doAction(ActionCode.TRACKBALL_SCROLL_FORWARD);
-		} else if (diffY < 0) {
-			myReader.doAction(ActionCode.TRACKBALL_SCROLL_BACKWARD);
+		if (diffX == 0 && diffY == 0) {
+			return true;
 		}
+
+		final int direction = (diffY != 0) ?
+			(diffY > 0 ? Direction.DOWN : Direction.UP) :
+			(diffX > 0 ? Direction.RIGHT : Direction.LEFT);
+
+		if (!moveRegionPointer(direction)) {
+			if (direction == Direction.DOWN) {
+				scrollPage(true, ZLTextView.ScrollingMode.SCROLL_LINES, 1);
+			} else if (direction == Direction.UP) {
+				scrollPage(false, ZLTextView.ScrollingMode.SCROLL_LINES, 1);
+			}
+		}
+
+		myReader.repaintView();
+
 		return true;
+	}
+
+	@Override
+	public int getMode() {
+		return myReader.TextViewModeOption.getValue();
 	}
 
 	@Override

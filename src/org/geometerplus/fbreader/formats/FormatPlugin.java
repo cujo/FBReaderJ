@@ -28,14 +28,15 @@ public abstract class FormatPlugin {
 	public abstract boolean acceptsFile(ZLFile file);
 	public abstract	boolean readMetaInfo(Book book);
 	public abstract boolean readModel(BookModel model);
-	public abstract ZLImage readCover(Book book);
+	public abstract ZLImage readCover(ZLFile file);
+	public abstract String readAnnotation(ZLFile file);
 
 	/*
 	public static void detectEncodingAndLanguage(Book book, InputStream stream) throws IOException {	
 		String language = book.getLanguage();
 		String encoding = book.getEncoding();
 		if (encoding.length() == 0 || language.length() == 0) {
-			PluginCollection collection = PluginCollection.instance();
+			PluginCollection collection = PluginCollection.Instance();
 			if (language.length() == 0) {
 				language = collection.DefaultLanguageOption.getValue();
 			}
@@ -66,7 +67,7 @@ public abstract class FormatPlugin {
 	public static void detectEncodingAndLanguage(Book book, InputStream stream) {	
 		String encoding = book.getEncoding();
 		if (encoding.length() == 0) {
-			encoding = EncodingDetector.detect(stream, PluginCollection.instance().DefaultLanguageOption.getValue());
+			encoding = EncodingDetector.detect(stream, PluginCollection.Instance().DefaultLanguageOption.getValue());
 			if (encoding == "unknown") {
 				encoding = "windows-1252";
 			}
@@ -83,7 +84,7 @@ public abstract class FormatPlugin {
 					(encoding.equals("IBM866"))) {
 				book.setLanguage("ru");
 			} /*else if (
-	                (PluginCollection.instance().DefaultLanguageOption.getValue() == EncodingDetector.Language.CZECH) &&
+	                (PluginCollection.Instance().DefaultLanguageOption.getValue() == EncodingDetector.Language.CZECH) &&
 					((encoding == "windows-1250") ||
 					 (encoding == "ISO-8859-2") ||
 					 (encoding == "IBM852"))) {

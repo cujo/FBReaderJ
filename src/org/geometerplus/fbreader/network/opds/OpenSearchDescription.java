@@ -22,8 +22,6 @@ package org.geometerplus.fbreader.network.opds;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.geometerplus.zlibrary.core.util.ZLNetworkUtil;
-
 class OpenSearchDescription {
 
 	public static OpenSearchDescription createDefault(String template) {
@@ -86,7 +84,7 @@ class OpenSearchDescription {
 					return null;
 				}
 			} else if (name == "language") {
-				m.appendReplacement(query, ZLNetworkUtil.htmlEncode("*"));
+				m.appendReplacement(query, "*");
 			} else if (name == "inputEncoding" || name == "outputEncoding") {
 				m.appendReplacement(query, "UTF-8");
 			} else {

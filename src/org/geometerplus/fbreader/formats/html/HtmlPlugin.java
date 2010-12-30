@@ -50,7 +50,12 @@ public class HtmlPlugin extends FormatPlugin {
 	}
 
 	@Override
-	public ZLImage readCover(Book book) {
+	public ZLImage readCover(ZLFile file) {
+		return null;
+	}
+
+	@Override
+	public String readAnnotation(ZLFile file) {
 		return null;
 	}
 }

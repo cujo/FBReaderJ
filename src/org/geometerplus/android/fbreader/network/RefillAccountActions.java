@@ -22,13 +22,14 @@ package org.geometerplus.android.fbreader.network;
 import android.view.Menu;
 import android.view.ContextMenu;
 
+import org.geometerplus.fbreader.network.INetworkLink;
 import org.geometerplus.fbreader.network.NetworkTree;
 import org.geometerplus.fbreader.network.authentication.NetworkAuthenticationManager;
 
 
 class RefillAccountActions extends NetworkTreeActions {
-
-	public static final int REFILL_ITEM_ID = 0;
+	public static final int REFILL_VIA_SMS_ITEM_ID = 0;
+	public static final int REFILL_VIA_BROWSER_ITEM_ID = 1;
 
 
 	@Override
@@ -40,12 +41,28 @@ class RefillAccountActions extends NetworkTreeActions {
 	public void buildContextMenu(NetworkBaseActivity activity, ContextMenu menu, NetworkTree tree) {
 		menu.setHeaderTitle(getTitleValue("refillTitle"));
 
-		addMenuItem(menu, REFILL_ITEM_ID, "refillTitle");
+		final INetworkLink link = ((RefillAccountTree)tree).Link;
+		if (Util.isSmsAccountRefillingSupported(activity, link)) {
+			addMenuItem(menu, REFILL_VIA_SMS_ITEM_ID, "refillViaSms");
+		}
+		if (Util.isBrowserAccountRefillingSupported(activity, link)) {
+			addMenuItem(menu, REFILL_VIA_BROWSER_ITEM_ID, "refillViaBrowser");
+		}
 	}
 
 	@Override
-	public int getDefaultActionCode(NetworkTree tree) {
-		return REFILL_ITEM_ID;
+	public int getDefaultActionCode(NetworkBaseActivity activity, NetworkTree tree) {
+		final INetworkLink link = ((RefillAccountTree)tree).Link;
+		final boolean sms = Util.isSmsAccountRefillingSupported(activity, link);
+		final boolean browser = Util.isBrowserAccountRefillingSupported(activity, link);
+
+		if (sms && browser) {
+			return TREE_SHOW_CONTEXT_MENU;
+		} else if (sms) {
+			return REFILL_VIA_SMS_ITEM_ID;
+		} else /* if (browser) */ { 
+			return REFILL_VIA_BROWSER_ITEM_ID;
+		}
 	}
 
 	@Override
@@ -59,35 +76,58 @@ class RefillAccountActions extends NetworkTreeActions {
 	}
 
 	@Override
-	public boolean prepareOptionsMenu(Menu menu, NetworkTree tree) {
+	public boolean prepareOptionsMenu(NetworkBaseActivity activity, Menu menu, NetworkTree tree) {
 		return false;
 	}
 
 	@Override
 	public boolean runAction(NetworkBaseActivity activity, NetworkTree tree, int actionCode) {
+		final INetworkLink link = ((RefillAccountTree)tree).Link;
+		Runnable refillRunnable = null;
 		switch (actionCode) {
-			case REFILL_ITEM_ID:
-				doRefill(activity, (RefillAccountTree) tree);
-				return true;
+			case REFILL_VIA_SMS_ITEM_ID:
+				refillRunnable = smsRefillRunnable(activity, link);
+				break;
+			case REFILL_VIA_BROWSER_ITEM_ID:
+				refillRunnable = browserRefillRunnable(activity, link);
+				break;
 		}
-		return false;
+
+		if (refillRunnable == null) {
+			return false;
+		}
+		doRefill(activity, link, refillRunnable);
+		return true;
 	}
 
-	private void doRefill(final NetworkBaseActivity activity, final RefillAccountTree tree) {
-		final NetworkAuthenticationManager mgr = tree.Link.authenticationManager();
+	private Runnable browserRefillRunnable(final NetworkBaseActivity activity, final INetworkLink link) {
+		return new Runnable() {
+			public void run() {
+				Util.openInBrowser(
+					activity,
+					link.authenticationManager().refillAccountLink()
+				);
+			}
+		};
+	}
+
+	private Runnable smsRefillRunnable(final NetworkBaseActivity activity, final INetworkLink link) {
+		return new Runnable() {
+			public void run() {
+				Util.runSmsDialog(activity, link);
+			}
+		};
+	}
+
+	private void doRefill(final NetworkBaseActivity activity, final INetworkLink link, final Runnable refiller) {
+		final NetworkAuthenticationManager mgr = link.authenticationManager();
 		if (mgr.mayBeAuthorised(false)) {
-			NetworkView.Instance().openInBrowser(
-				activity,
-				tree.Link.authenticationManager().refillAccountLink()
-			);
+			refiller.run();
 		} else {
-			NetworkDialog.show(activity, NetworkDialog.DIALOG_AUTHENTICATION, tree.Link, new Runnable() {
+			NetworkDialog.show(activity, NetworkDialog.DIALOG_AUTHENTICATION, link, new Runnable() {
 				public void run() {
 					if (mgr.mayBeAuthorised(false)) {
-						NetworkView.Instance().openInBrowser(
-							activity,
-							tree.Link.authenticationManager().refillAccountLink()
-						);
+						refiller.run();
 					}
 				}
 			});

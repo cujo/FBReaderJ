@@ -8,15 +8,41 @@
 		<node name="demo" value="Auszug"/>
 	</node>
 	<node name="libraryView">
-		<node name="byAuthor" value="Nach Autor"/>
-		<node name="byTag" value="Nach Tags"/>
-		<node name="recent" value="Verlauf"/>
-		<node name="searchResults" value="Gefunden"/>
+		<node name="byAuthor" value="Nach Autor">
+			<node name="summary" value="Books sorted by author" toBeTranslated="true"/>
+		</node>
+		<node name="byTag" value="Nach Tags">
+			<node name="summary" value="Books sorted by tag" toBeTranslated="true"/>
+		</node>
+		<node name="recent" value="Verlauf">
+			<node name="summary" value="Recently opened books" toBeTranslated="true"/>
+		</node>
+		<node name="favorites" value="Favorites" toBeTranslated="true">
+			<node name="summary" value="My selected books" toBeTranslated="true"/>
+		</node>
+		<node name="searchResults" value="Gefunden">
+			<node name="summary" value="Suchergebnisse für: %s" />
+		</node>
+		<node name="fileTree" value="File tree" toBeTranslated="true">
+			<node name="summary" value="Browse file system" toBeTranslated="true"/>
+		</node>
+		<node name="fileTreeRoot" value="Device" toBeTranslated="true">
+			<node name="summary" value="Full file system of the device" toBeTranslated="true"/>
+		</node>
+		<node name="fileTreeCard" value="Memory card" toBeTranslated="true">
+			<node name="summary" value="Memory card inserted into the device" toBeTranslated="true"/>
+		</node>
+		<node name="fileTreeLibrary" value="FBReader library" toBeTranslated="true">
+			<node name="summary" value="FBReader books directory" toBeTranslated="true"/>
+		</node>
 		<node name="menu">
 			<node name="localSearch" value="Lokale Suche"/>
 		</node>
 		<node name="openBook" value="Buch zum lesen öffnen"/>
+		<node name="showBookInfo" value="Book info" toBeTranslated="true"/>
 		<node name="deleteBook" value="Buch löschen"/>
+		<node name="addToFavorites" value="Add to favorites" toBeTranslated="true"/>
+		<node name="removeFromFavorites" value="Remove from favorites" toBeTranslated="true"/>
 	</node>
 	<node name="networkView">
 		<node name="openCatalog" value="Katalog öffnen"/>
@@ -36,6 +62,8 @@
 		<node name="signOut" value="Ausloggen (%s)"/>
 		<node name="refillAccount" value="Konto aufladen (derzeit: %s)"/>
 		<node name="refillTitle" value="Konto aufladen"/>
+		<node name="refillViaSms" value="Text messages" toBeTranslated="true"/>
+		<node name="refillViaBrowser" value="Open page in browser" toBeTranslated="true"/>
 		<node name="refillSummary" value="Derzeit: %s"/>
 		<node name="alreadyDownloading" value="Buch wird schon geladen" />
 		<node name="alreadyDownloadingDemo" value="Leseprobe wird schon geladen" />
@@ -63,6 +91,7 @@
 			<node name="reload" value="Neu laden"/>
 			<node name="signIn" value="Einloggen"/>
 			<node name="signOut" value="Ausloggen (%s)"/>
+			<node name="signUp" value="Anmelden" />
 			<node name="refillAccount" value="Konto aufladen"/>
 			<node name="addCustomCatalog" value="Katalog hinzufügen"/>
 			<node name="refreshCatalogsList" value="Liste der Kataloge aktualisieren"/>
@@ -78,6 +107,25 @@
 		<node name="series" value="Serie:" />
 		<node name="indexInSeries" value="Seriennummer:" />
 		<node name="tags" value="Tags:" />
+	</node>
+	<node name="bookInfo">
+		<node name="bookInfo" value="Buchinformation" />
+		<node name="fileInfo" toBeTranslated="true" value="File Info" />
+		<node name="annotation" value="Anmerkung" />
+		<node name="title" value="Titel:" />
+		<node name="authors" value="Autor(en):" />
+		<node name="series" value="Serie:" />
+		<node name="indexInSeries" value="Seriennummer:" />
+		<node name="tags" value="Tags:" />
+		<node name="name" toBeTranslated="true" value="Name:" />
+		<node name="type" toBeTranslated="true" value="Type:" />
+		<node name="size" toBeTranslated="true" value="Size:" />
+		<node name="time" toBeTranslated="true" value="Last modified:" />
+		<node name="sizeInBytes" toBeTranslated="true" value="%s byte(s)" />
+		<node name="sizeInKiloBytes" toBeTranslated="true" value="%s kB" />
+		<node name="menu">
+			<node name="edit" toBeTranslated="true" value="Edit" />
+		</node>
 	</node>
 	<node name="bookDownloader">
 		<node name="tickerSuccess" value="Buch wurde runtergeladen." />
@@ -112,6 +160,8 @@
 		<node name="day" value="Tag"/>
 		<node name="night" value="Nacht"/>
 		<node name="networkLibrary" value="Netzwerk Bibliothek"/>
+		<node name="hyperlinksOnlyMode" value="Standard mode" toBeTranslated="true"/>
+		<node name="dictionaryMode" value="Dictionary mode" toBeTranslated="true"/>
 		<node name="navigate" value="Seite auswählen">
 			<node name="toc" value="Inhaltsverzeichnis zeigen"/>
 			<node name="gotoHome" value="Zum Anfang gehen"/>
@@ -137,11 +187,27 @@
 	</node>
 	<node name="dialog">
 		<node name="button">
+			<node name="install" value="Install" toBeTranslated="true" />
+			<node name="update" value="Update" toBeTranslated="true" />
+			<node name="skip" value="Skip" toBeTranslated="true" />
 			<node name="buy" value="Kaufen" />
 			<node name="buyAndDownload" value="Kaufen und herunterladen" />
 			<node name="continue" value="Fortsetzen" />
 			<node name="editUrl" value="URL bearbeiten" />
 			<node name="tryAgain" value="Erneut versuchen" />
+			<node name="openBook" value="Read" toBeTranslated="true" />
+			<node name="editInfo" value="Edit" toBeTranslated="true" />
+			<node name="reloadInfo" value="Reload" toBeTranslated="true" />
+		</node>
+		<node name="installPlugin">
+			<node name="title" value="Install plugin" toBeTranslated="true" />
+		</node>
+		<node name="updatePlugin">
+			<node name="title" value="Update plugin" toBeTranslated="true" />
+		</node>
+		<node name="installDictionary">
+			<node name="title" value="Install dictionary" toBeTranslated="true" />
+			<node name="message" value="Would you like to install %s?" toBeTranslated="true" />
 		</node>
 		<node name="BookInfo">
 			<node name="fileName" value="Dateiname"/>
@@ -435,7 +501,6 @@
 			<node name="authentication" value="Authentifizierung. Bitte warten..." />
 			<node name="signOut" value="Buch wird ausgetragen. Bitte warten..." />
 			<node name="purchaseBook" value="Buch wird gekauft. Bitte warten..." />
-			<node name="registerUser" value="Neues Benutzerkonto wird registriert. Bitte warten..." />
 			<node name="loadingCatalogInfo" value="Kataloginformation wird geladen. Bitte warten..."/>
 			<node name="updatingCatalogsList" value="Katalogliste wird aktualisiert. Bitte warten..."/>
 		</node>
@@ -446,12 +511,6 @@
 			<node name="purchaseAlreadyPurchased" value="Das Duch wurde bereits gekauft." />
 			<node name="bookNotPurchased" value="Das Buch wurde nicht gekauft." />
 			<node name="downloadLimitExceeded" value="Download-Limit ist überschritten." />
-			<node name="loginAlreadyTaken" value="Benutzername wird bereits verwendet." />
-			<node name="loginNotSpecified" value="Bitte den Benutzernamen eingeben." />
-			<node name="passwordNotSpecified" value="Bitte ein Passwort eingeben." />
-			<node name="emailNotSpecified" value="Bitte eine Email-Adresse eingeben." />
-			<node name="invalidEMail" value="Ungültige Email-Adresse." />
-			<node name="tooManyRegistrations" value="Zu viele Registrierungen von Ihrer IP-Adresse;&#10;bitte in einigen Minuten noch einmal versuchen." />
 			<node name="noUserEmail" value="Es gibt keinen registrierten Nutzer mit dieser Email-Adresse&#10;" />
 			<node name="unsupportedOperation" value="Operation wird nicht unterstützt." />
 			<node name="notAnOPDS" value="Dies sit kein OPDS Katalog." />
@@ -473,14 +532,6 @@
 			<node name="skipIP" value="Nicht an IP-Adresse binden" />
 			<node name="loginIsEmpty" value="Es sollte ein Benutzername angegeben werden." />
 			<node name="register" value="Anmelden" />
-		</node>
-		<node name="RegisterUserDialog">
-			<node name="title" value="Registrierter Benutzer" />
-			<node name="login" value="Benutzername" />
-			<node name="password" value="Passwort" />
-			<node name="confirmPassword" value="Passwortbestätigung" />
-			<node name="email" value="Email" />
-			<node name="differentPasswords" value="Passwort und Passwortbestätigung müssen identisch sein." />
 		</node>
 		<node name="CustomCatalogDialog">
 			<node name="title" value="Benutzerspezifischer Katalog" />
@@ -509,10 +560,14 @@
 		</node>
 	</node>
 	<node name="errorMessage">
+		<node name="cannotRunAndroidMarket" value="Cannot access Android Market. Please, install %s manually" toBeTranslated="true"/>
 		<node name="textNotFound" value="Es wurde kein passender Text im Buch gefunden."/>
 		<node name="bookNotFound" value="Es wurden keine passenden Bücher in der Bibliothek gefunden."/>
 		<node name="bookmarkNotFound" value="Es wurden kein passenden Lesezeichen gefunden."/>
 		<node name="cannotOpenBook" value="Das Buch kann zurzeit nicht geöffnet werden."/>
+		<node name="dictionaryIsNotInstalled" value="Dictionary is not installed, sorry" toBeTranslated="true"/>
+		<node name="permissionDenied" value="Permission denied, sorry" toBeTranslated="true"/>
+		<node name="noFavorites" value="Your favorites list is empty, sorry" toBeTranslated="true"/>
 	</node>
 	<node name="external">
 		<node name="browser" value="Browser"/>

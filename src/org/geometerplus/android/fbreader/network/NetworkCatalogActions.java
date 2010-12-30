@@ -19,10 +19,10 @@
 
 package org.geometerplus.android.fbreader.network;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Message;
 import android.os.Handler;
 import android.view.Menu;
@@ -33,6 +33,7 @@ import org.geometerplus.zlibrary.core.util.ZLBoolean3;
 import org.geometerplus.zlibrary.core.network.ZLNetworkException;
 
 import org.geometerplus.android.util.UIUtil;
+import org.geometerplus.android.util.PackageUtil;
 
 import org.geometerplus.fbreader.network.*;
 import org.geometerplus.fbreader.network.tree.NetworkTreeFactory;
@@ -46,6 +47,7 @@ class NetworkCatalogActions extends NetworkTreeActions {
 	public static final int OPEN_CATALOG_ITEM_ID = 0;
 	public static final int OPEN_IN_BROWSER_ITEM_ID = 1;
 	public static final int RELOAD_ITEM_ID = 2;
+	public static final int SIGNUP_ITEM_ID = 3;
 	public static final int SIGNIN_ITEM_ID = 4;
 	public static final int SIGNOUT_ITEM_ID = 5;
 	public static final int REFILL_ACCOUNT_ITEM_ID = 6;
@@ -125,7 +127,7 @@ class NetworkCatalogActions extends NetworkTreeActions {
 	}
 
 	@Override
-	public int getDefaultActionCode(NetworkTree tree) {
+	public int getDefaultActionCode(NetworkBaseActivity activity, NetworkTree tree) {
 		final NetworkCatalogTree catalogTree = (NetworkCatalogTree) tree;
 		final NetworkCatalogItem item = catalogTree.Item;
 		if (item.URLByType.get(NetworkCatalogItem.URL_CATALOG) != null) {
@@ -159,13 +161,14 @@ class NetworkCatalogActions extends NetworkTreeActions {
 	public boolean createOptionsMenu(Menu menu, NetworkTree tree) {
 		addOptionsItem(menu, RELOAD_ITEM_ID, "reload");
 		addOptionsItem(menu, SIGNIN_ITEM_ID, "signIn");
+		addOptionsItem(menu, SIGNUP_ITEM_ID, "signUp");
 		addOptionsItem(menu, SIGNOUT_ITEM_ID, "signOut", "");
 		addOptionsItem(menu, REFILL_ACCOUNT_ITEM_ID, "refillAccount");
 		return true;
 	}
 
 	@Override
-	public boolean prepareOptionsMenu(Menu menu, NetworkTree tree) {
+	public boolean prepareOptionsMenu(NetworkBaseActivity activity, Menu menu, NetworkTree tree) {
 		final NetworkCatalogTree catalogTree = (NetworkCatalogTree) tree;
 		final NetworkCatalogItem item = catalogTree.Item;
 
@@ -197,6 +200,7 @@ class NetworkCatalogActions extends NetworkTreeActions {
 			}
 		}
 		prepareOptionsItem(menu, SIGNIN_ITEM_ID, signIn);
+		prepareOptionsItem(menu, SIGNUP_ITEM_ID, signIn & Util.isRegistrationSupported(activity, item.Link));
 		prepareOptionsItem(menu, SIGNOUT_ITEM_ID, signOut, "signOut", userName);
 		prepareOptionsItem(menu, REFILL_ACCOUNT_ITEM_ID, refill);
 		return true;
@@ -234,7 +238,7 @@ class NetworkCatalogActions extends NetworkTreeActions {
 				doExpandCatalog(activity, (NetworkCatalogTree)tree);
 				return true;
 			case OPEN_IN_BROWSER_ITEM_ID:
-				NetworkView.Instance().openInBrowser(
+				Util.openInBrowser(
 					activity,
 					((NetworkCatalogTree)tree).Item.URLByType.get(NetworkCatalogItem.URL_HTML_PAGE)
 				);
@@ -245,11 +249,14 @@ class NetworkCatalogActions extends NetworkTreeActions {
 			case SIGNIN_ITEM_ID:
 				NetworkDialog.show(activity, NetworkDialog.DIALOG_AUTHENTICATION, ((NetworkCatalogTree)tree).Item.Link, null);
 				return true;
+			case SIGNUP_ITEM_ID:
+				Util.runRegistrationDialog(activity, ((NetworkCatalogTree)tree).Item.Link);
+				return true;
 			case SIGNOUT_ITEM_ID:
 				doSignOut(activity, (NetworkCatalogTree)tree);
 				return true;
 			case REFILL_ACCOUNT_ITEM_ID:
-				NetworkView.Instance().openInBrowser(
+				Util.openInBrowser(
 					activity,
 					((NetworkCatalogTree)tree).Item.Link.authenticationManager().refillAccountLink()
 				);
@@ -386,6 +393,62 @@ class NetworkCatalogActions extends NetworkTreeActions {
 		}
 	}
 
+	private void runInstallPluginDialog(final NetworkBaseActivity activity, Map<String,String> pluginData, final Runnable postRunnable) {
+		final String plugin = pluginData.get("androidPlugin");
+		if (plugin != null) {
+			final String pluginVersion = pluginData.get("androidPluginVersion");
+
+			String dialogKey = null;
+			String message = null;
+			String positiveButtonKey = null;
+			
+			if (!PackageUtil.isPluginInstalled(activity, plugin)) {
+				dialogKey = "installPlugin";
+				message = pluginData.get("androidPluginInstallMessage");
+				positiveButtonKey = "install";
+			} else if (!PackageUtil.isPluginInstalled(activity, plugin, pluginVersion)) {
+				dialogKey = "updatePlugin";
+				message = pluginData.get("androidPluginUpdateMessage");
+				positiveButtonKey = "update";
+			}
+			if (dialogKey != null) {
+				final ZLResource dialogResource = ZLResource.resource("dialog");
+				final ZLResource buttonResource = dialogResource.getResource("button");
+				new AlertDialog.Builder(activity)
+					.setTitle(dialogResource.getResource(dialogKey).getResource("title").getValue())
+					.setMessage(message)
+					.setIcon(0)
+					.setPositiveButton(
+						buttonResource.getResource(positiveButtonKey).getValue(),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								PackageUtil.installFromMarket(activity, plugin);
+							}
+						}
+					)
+					.setNegativeButton(
+						buttonResource.getResource("skip").getValue(),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								postRunnable.run();
+							}
+						}
+					)
+					.create().show();
+				return;
+			}
+		}
+		postRunnable.run();
+	}
+
+	private void processExtraData(final NetworkBaseActivity activity, Map<String,String> extraData, final Runnable postRunnable) {
+		if (extraData != null && !extraData.isEmpty()) {
+			runInstallPluginDialog(activity, extraData, postRunnable);
+		} else {
+			postRunnable.run();
+		}
+	}
+
 	public void doExpandCatalog(final NetworkBaseActivity activity, final NetworkCatalogTree tree) {
 		final String url = tree.Item.URLByType.get(NetworkCatalogItem.URL_CATALOG);
 		if (url == null) {
@@ -408,13 +471,18 @@ class NetworkCatalogActions extends NetworkTreeActions {
 						NetworkView.Instance().fireModelChangedAsync();
 					}
 				}
+
 				final ExpandCatalogHandler handler = new ExpandCatalogHandler(tree, url);
 				NetworkView.Instance().startItemsLoading(
 					activity,
 					url,
 					new ExpandCatalogRunnable(handler, tree, true, resumeNotLoad)
 				);
-				NetworkView.Instance().openTree(activity, tree, url);
+				processExtraData(activity, tree.Item.extraData(), new Runnable() {
+					public void run() {
+						NetworkView.Instance().openTree(activity, tree, url);
+					}
+				});
 			}
 		});
 	}

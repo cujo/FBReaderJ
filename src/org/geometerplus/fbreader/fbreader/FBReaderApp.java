@@ -42,6 +42,8 @@ public final class FBReaderApp extends ZLApplication {
 	public final ZLBooleanOption UseSeparateBindingsOption =
 		new ZLBooleanOption("KeysOptions", "UseSeparateBindings", false);
 
+	public final ZLIntegerRangeOption TextViewModeOption =
+		new ZLIntegerRangeOption("Options", "TextViewMode", 0, 1, 0);
 	public final ZLIntegerRangeOption LeftMarginOption =
 		new ZLIntegerRangeOption("Options", "LeftMargin", 0, 30, 4);
 	public final ZLIntegerRangeOption RightMarginOption =
@@ -79,7 +81,7 @@ public final class FBReaderApp extends ZLApplication {
 	private final ZLKeyBindings myBindings = new ZLKeyBindings("Keys");
 
 	public final FBView BookTextView;
-	final FBView FootnoteView;
+	public final FBView FootnoteView;
 
 	public BookModel Model;
 
@@ -87,7 +89,6 @@ public final class FBReaderApp extends ZLApplication {
 
 	public FBReaderApp(String arg) {
 		myArg0 = arg;
-		addAction(ActionCode.QUIT, new QuitAction(this));
 
 		addAction(ActionCode.INCREASE_FONT, new ChangeFontSizeAction(this, +2));
 		addAction(ActionCode.DECREASE_FONT, new ChangeFontSizeAction(this, -2));
@@ -99,13 +100,11 @@ public final class FBReaderApp extends ZLApplication {
 
 		addAction(ActionCode.VOLUME_KEY_SCROLL_FORWARD, new VolumeKeyScrollingAction(this, true));
 		addAction(ActionCode.VOLUME_KEY_SCROLL_BACKWARD, new VolumeKeyScrollingAction(this, false));
-		addAction(ActionCode.TRACKBALL_SCROLL_FORWARD, new TrackballScrollingAction(this, true));
-		addAction(ActionCode.TRACKBALL_SCROLL_BACKWARD, new TrackballScrollingAction(this, false));
+
 		addAction(ActionCode.CANCEL, new CancelAction(this));
 		//addAction(ActionCode.COPY_SELECTED_TEXT_TO_CLIPBOARD, new DummyAction(this));
 		//addAction(ActionCode.OPEN_SELECTED_TEXT_IN_DICTIONARY, new DummyAction(this));
 		//addAction(ActionCode.CLEAR_SELECTION, new DummyAction(this));
-		addAction(ActionCode.FOLLOW_HYPERLINK, new FollowHyperlinkAction(this));
 
 		addAction(ActionCode.SWITCH_TO_DAY_PROFILE, new SwitchProfileAction(this, ColorProfile.DAY));
 		addAction(ActionCode.SWITCH_TO_NIGHT_PROFILE, new SwitchProfileAction(this, ColorProfile.NIGHT));
@@ -133,6 +132,11 @@ public final class FBReaderApp extends ZLApplication {
 	}
 
 	public void openBook(final Book book, final Bookmark bookmark) {
+		if (Model != null) {
+			if (bookmark == null & book.File.getPath().equals(Model.Book.File.getPath())) {
+				return;
+			}
+		}
 		ZLDialogManager.Instance().wait("loadingBook", new Runnable() {
 			public void run() {
 				openBookInternal(book, bookmark);
@@ -166,7 +170,7 @@ public final class FBReaderApp extends ZLApplication {
 		return (FBView)getCurrentView();
 	}
 
-	void tryOpenFootnote(String id) {
+	public void tryOpenFootnote(String id) {
 		if (Model != null) {
 			BookModel.Label label = Model.getLabel(id);
 			if (label != null) {

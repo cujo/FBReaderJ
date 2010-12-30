@@ -23,30 +23,32 @@ import java.util.LinkedList;
 
 import android.app.SearchManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.KeyEvent;
-import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.widget.*;
 
 import org.geometerplus.zlibrary.core.application.ZLApplication;
+import org.geometerplus.zlibrary.core.filesystem.ZLFile;
 import org.geometerplus.zlibrary.core.resources.ZLResource;
 import org.geometerplus.zlibrary.core.view.ZLView;
 import org.geometerplus.zlibrary.text.view.ZLTextFixedPosition;
 import org.geometerplus.zlibrary.text.view.ZLTextPosition;
 import org.geometerplus.zlibrary.text.view.ZLTextView;
+import org.geometerplus.zlibrary.text.view.ZLTextViewMode;
+import org.geometerplus.zlibrary.ui.android.R;
 import org.geometerplus.zlibrary.ui.android.library.ZLAndroidActivity;
 import org.geometerplus.zlibrary.ui.android.library.ZLAndroidApplication;
-import org.geometerplus.zlibrary.ui.android.R;
 
-import org.geometerplus.fbreader.fbreader.FBReaderApp;
 import org.geometerplus.fbreader.fbreader.ActionCode;
-import org.geometerplus.fbreader.library.Library;
+import org.geometerplus.fbreader.fbreader.FBReaderApp;
+
 
 public final class FBReader extends ZLAndroidActivity {
+	public static final String BOOK_PATH_KEY = "BookPath";
+
 	final static int REPAINT_CODE = 1;
 
 	static FBReader Instance;
@@ -84,9 +86,24 @@ public final class FBReader extends ZLAndroidActivity {
 	private static TextSearchButtonPanel myTextSearchPanel;
 	private static NavigationButtonPanel myNavigatePanel;
 
+	/*private String fileNameFromUri(Uri uri) {
+		if (uri.equals(Uri.parse("file:///"))) {
+			return Library.getHelpFile().getPath();
+		} else {
+			return uri.getPath();
+		}
+	}*/
+
 	@Override
-	protected String fileNameForEmptyUri() {
-		return Library.getHelpFile().getPath();
+	protected ZLFile fileFromIntent(Intent intent) {
+		String filePath = intent.getStringExtra(BOOK_PATH_KEY);
+		if (filePath == null) {
+			final Uri data = intent.getData();
+			if (data != null) {
+				filePath = data.getPath();
+			}
+		}
+		return filePath != null ? ZLFile.createFileByPath(filePath) : null;
 	}
 
 	@Override
@@ -118,6 +135,10 @@ public final class FBReader extends ZLAndroidActivity {
 		
 		fbReader.addAction(ActionCode.SHOW_NAVIGATION, new ShowNavigationAction(this, fbReader));
 		fbReader.addAction(ActionCode.SEARCH, new SearchAction(this, fbReader));
+
+		fbReader.addAction(ActionCode.PROCESS_HYPERLINK, new ProcessHyperlinkAction(this, fbReader));
+		fbReader.addAction(ActionCode.SET_TEXT_VIEW_MODE_VISIT_HYPERLINKS, new SwitchTextViewModeAction(this, fbReader, ZLTextViewMode.MODE_VISIT_HYPERLINKS));
+		fbReader.addAction(ActionCode.SET_TEXT_VIEW_MODE_VISIT_ALL_WORDS, new SwitchTextViewModeAction(this, fbReader, ZLTextViewMode.MODE_VISIT_ALL_WORDS));
 	}
 
 	@Override
@@ -191,11 +212,11 @@ public final class FBReader extends ZLAndroidActivity {
 		}
 	}
 
-	protected ZLApplication createApplication(String fileName) {
+	protected ZLApplication createApplication(ZLFile file) {
 		if (SQLiteBooksDatabase.Instance() == null) {
 			new SQLiteBooksDatabase(this, "READER");
 		}
-		return new FBReaderApp(fileName);
+		return new FBReaderApp(file != null ? file.getPath() : null);
 	}
 
 	@Override

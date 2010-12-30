@@ -58,8 +58,14 @@ public class OEBPlugin extends FormatPlugin {
 	}
 
 	@Override
-	public ZLImage readCover(Book book) {
-		final ZLFile opfFile = getOpfFile(book.File);
+	public ZLImage readCover(ZLFile file) {
+		final ZLFile opfFile = getOpfFile(file);
 		return (opfFile != null) ? new OEBCoverReader().readCover(opfFile) : null;
+	}
+
+	@Override
+	public String readAnnotation(ZLFile file) {
+		final ZLFile opfFile = getOpfFile(file);
+		return (opfFile != null) ? new OEBAnnotationReader().readAnnotation(opfFile) : null;
 	}
 }

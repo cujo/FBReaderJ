@@ -19,6 +19,8 @@
 
 package org.geometerplus.fbreader.library;
 
+import org.geometerplus.zlibrary.core.image.ZLImage;
+
 public class BookTree extends LibraryTree {
 	public final Book Book;
 	private final boolean myShowAuthors;
@@ -29,10 +31,12 @@ public class BookTree extends LibraryTree {
 		myShowAuthors = showAuthors;
 	}
 
+	@Override
 	public String getName() {
 		return Book.getTitle();
 	}
 
+	@Override
 	public String getSummary() {
 		if (!myShowAuthors) {
 			return super.getSummary();
@@ -49,5 +53,10 @@ public class BookTree extends LibraryTree {
 			}
 		}
 		return builder.toString();
+	}
+
+	@Override
+	protected ZLImage createCover() {
+		return Library.getCover(Book.File);
 	}
 }

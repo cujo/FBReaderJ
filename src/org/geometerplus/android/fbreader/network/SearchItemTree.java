@@ -23,17 +23,17 @@ import java.util.Set;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-import org.geometerplus.zlibrary.core.image.ZLImage;
 import org.geometerplus.zlibrary.core.resources.ZLResource;
 
 import org.geometerplus.fbreader.tree.FBTree;
 import org.geometerplus.fbreader.network.*;
 import org.geometerplus.fbreader.network.tree.NetworkAuthorTree;
 
-import org.geometerplus.zlibrary.ui.android.library.ZLAndroidLibrary;
 import org.geometerplus.zlibrary.ui.android.R;
 
-public class SearchItemTree extends NetworkTree {
+import org.geometerplus.android.fbreader.tree.ZLAndroidTree;
+
+public class SearchItemTree extends NetworkTree implements ZLAndroidTree {
 
 	private SearchResult myResult;
 
@@ -51,9 +51,8 @@ public class SearchItemTree extends NetworkTree {
 		return ZLResource.resource("networkView").getResource("searchSummary").getValue();
 	}
 
-	@Override
-	protected ZLImage createCover() {
-		return ((ZLAndroidLibrary)ZLAndroidLibrary.Instance()).createImage(R.drawable.ic_list_searchresult);
+	public int getCoverResourceId() {
+		return R.drawable.ic_list_searchresult;
 	}
 
 	public void setSearchResult(SearchResult result) {

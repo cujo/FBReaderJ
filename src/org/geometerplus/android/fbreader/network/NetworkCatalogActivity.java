@@ -26,14 +26,13 @@ import android.view.*;
 import android.widget.BaseAdapter;
 import android.content.Intent;
 
+import org.geometerplus.zlibrary.core.network.ZLNetworkException;
+
 import org.geometerplus.fbreader.network.NetworkTree;
 import org.geometerplus.fbreader.network.NetworkCatalogItem;
 import org.geometerplus.fbreader.network.tree.*;
-import org.geometerplus.fbreader.network.authentication.NetworkAuthenticationManager;
 
-
-public class NetworkCatalogActivity extends NetworkBaseActivity {
-
+public class NetworkCatalogActivity extends NetworkBaseActivity implements UserRegistrationConstants {
 	public static final String CATALOG_LEVEL_KEY = "org.geometerplus.android.fbreader.network.CatalogLevel";
 	public static final String CATALOG_KEY_KEY = "org.geometerplus.android.fbreader.network.CatalogKey";
 
@@ -75,6 +74,24 @@ public class NetworkCatalogActivity extends NetworkBaseActivity {
 		setListAdapter(new CatalogAdapter());
 		getListView().invalidateViews();
 		setupTitle();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case USER_REGISTRATION_REQUEST_CODE:
+				if (resultCode == RESULT_OK && data != null) {
+					try {
+						Util.runAfterRegistration(
+							((NetworkCatalogTree)myTree).Item.Link.authenticationManager(),
+							data
+						);
+					} catch (ZLNetworkException e) {
+						// TODO: show an error message
+					}
+				}
+				break;
+		}
 	}
 
 	private final void setupTitle() {
@@ -129,17 +146,14 @@ public class NetworkCatalogActivity extends NetworkBaseActivity {
 		public CatalogAdapter() {
 			if (myTree instanceof NetworkCatalogRootTree) {
 				NetworkCatalogTree tree = (NetworkCatalogTree) myTree;
-				NetworkAuthenticationManager mgr = tree.Item.Link.authenticationManager();
-				if (mgr != null) {
-					mySpecialItems = new ArrayList<NetworkTree>();
-					if (mgr.refillAccountSupported()) {
-						mySpecialItems.add(new RefillAccountTree(tree));
-					}
-					if (mySpecialItems.size() > 0) {
-						mySpecialItems.trimToSize();
-					} else {
-						mySpecialItems = null;
-					}
+				mySpecialItems = new ArrayList<NetworkTree>();
+				if (Util.isAccountRefillingSupported(NetworkCatalogActivity.this, tree.Item.Link)) {
+					mySpecialItems.add(new RefillAccountTree(tree));
+				}
+				if (mySpecialItems.size() > 0) {
+					mySpecialItems.trimToSize();
+				} else {
+					mySpecialItems = null;
 				}
 			}
 		}
@@ -230,7 +244,7 @@ public class NetworkCatalogActivity extends NetworkBaseActivity {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
-		return NetworkView.Instance().prepareOptionsMenu(menu, myTree);
+		return NetworkView.Instance().prepareOptionsMenu(this, menu, myTree);
 	}
 
 	@Override

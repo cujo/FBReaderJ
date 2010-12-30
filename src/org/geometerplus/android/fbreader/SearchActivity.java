@@ -22,13 +22,10 @@ package org.geometerplus.android.fbreader;
 import android.os.*;
 import android.app.*;
 import android.content.Intent;
-import android.widget.Toast;
-
-import org.geometerplus.zlibrary.core.resources.ZLResource;
 
 import org.geometerplus.android.util.UIUtil;
 
-abstract class SearchActivity extends Activity {
+public abstract class SearchActivity extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -48,13 +45,7 @@ abstract class SearchActivity extends Activity {
 			};
 			final Handler failureHandler = new Handler() {
 				public void handleMessage(Message message) {
-					Toast.makeText(
-						getParentActivity(),
-						ZLResource.resource("errorMessage").getResource(
-							getFailureMessageResourceKey()
-						).getValue(),
-						Toast.LENGTH_SHORT
-					).show();
+					UIUtil.showErrorMessage(getParentActivity(), getFailureMessageResourceKey());
 				}
 			};
 			final Runnable runnable = new Runnable() {
@@ -71,10 +62,10 @@ abstract class SearchActivity extends Activity {
 		finish();
 	}
 
-	abstract boolean runSearch(String pattern);
-	abstract void onSuccess();
-	//abstract void onFailure();
-	abstract String getWaitMessageResourceKey();
-	abstract String getFailureMessageResourceKey();
-	abstract Activity getParentActivity();
+	public abstract boolean runSearch(String pattern);
+	public abstract void onSuccess();
+	//public abstract void onFailure();
+	public abstract String getWaitMessageResourceKey();
+	public abstract String getFailureMessageResourceKey();
+	public abstract Activity getParentActivity();
 }

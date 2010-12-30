@@ -60,7 +60,7 @@ public final class SQLiteBooksDatabase extends BooksDatabase {
 
 	private void migrate(Context context) {
 		final int version = myDatabase.getVersion();
-		final int currentVersion = 10;
+		final int currentVersion = 12;
 		if (version >= currentVersion) {
 			return;
 		}
@@ -89,6 +89,10 @@ public final class SQLiteBooksDatabase extends BooksDatabase {
 						updateTables8();
 					case 9:
 						updateTables9();
+					case 10:
+						updateTables10();
+					case 11:
+						updateTables11();
 				}
 				myDatabase.setTransactionSuccessful();
 				myDatabase.endTransaction();
@@ -566,7 +570,7 @@ public final class SQLiteBooksDatabase extends BooksDatabase {
 		final String[] parameters = { null };
 		FileInfo current = null;
 		for (ZLFile f : fileStack) {
-			parameters[0] = f.getName(false);
+			parameters[0] = f.getLongName();
 			final Cursor cursor = myDatabase.rawQuery(
 				(current == null) ?
 					"SELECT file_id,size FROM Files WHERE name = ?" :
@@ -637,6 +641,40 @@ public final class SQLiteBooksDatabase extends BooksDatabase {
 	protected List<Long> loadRecentBookIds() {
 		final Cursor cursor = myDatabase.rawQuery(
 			"SELECT book_id FROM RecentBooks ORDER BY book_index", null
+		);
+		final LinkedList<Long> ids = new LinkedList<Long>();
+		while (cursor.moveToNext()) {
+			ids.add(cursor.getLong(0));
+		}
+		cursor.close();
+		return ids;
+	}
+
+	private SQLiteStatement myAddToFavoritesStatement;
+	protected void addToFavorites(long bookId) {
+		if (myAddToFavoritesStatement == null) {
+			myAddToFavoritesStatement = myDatabase.compileStatement(
+				"INSERT OR IGNORE INTO Favorites(book_id) VALUES (?)"
+			);
+		}
+		myAddToFavoritesStatement.bindLong(1, bookId);
+		myAddToFavoritesStatement.execute();
+	}
+
+	private SQLiteStatement myRemoveFromFavoritesStatement;
+	protected void removeFromFavorites(long bookId) {
+		if (myRemoveFromFavoritesStatement == null) {
+			myRemoveFromFavoritesStatement = myDatabase.compileStatement(
+				"DELETE FROM Favorites WHERE book_id = ?"
+			);
+		}
+		myRemoveFromFavoritesStatement.bindLong(1, bookId);
+		myRemoveFromFavoritesStatement.execute();
+	}
+
+	protected List<Long> loadFavoritesIds() {
+		final Cursor cursor = myDatabase.rawQuery(
+			"SELECT book_id FROM Favorites", null
 		);
 		final LinkedList<Long> ids = new LinkedList<Long>();
 		while (cursor.moveToNext()) {
@@ -1070,5 +1108,15 @@ public final class SQLiteBooksDatabase extends BooksDatabase {
 
 	private void updateTables9() {
 		myDatabase.execSQL("CREATE INDEX BookList_BookIndex ON BookList (book_id)");
+	}
+
+	private void updateTables10() {
+		myDatabase.execSQL(
+			"CREATE TABLE IF NOT EXISTS Favorites(" +
+				"book_id INTEGER UNIQUE NOT NULL REFERENCES Books(book_id))");
+	}
+
+	private void updateTables11() {
+		myDatabase.execSQL("UPDATE Files SET size = size + 1");
 	}
 }

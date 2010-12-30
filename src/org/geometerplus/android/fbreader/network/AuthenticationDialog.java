@@ -21,17 +21,17 @@ package org.geometerplus.android.fbreader.network;
 
 import android.app.Dialog;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.view.View;
 import android.widget.TextView;
-import android.content.DialogInterface;
 
 import org.geometerplus.zlibrary.ui.android.R;
-
-import org.geometerplus.android.util.UIUtil;
 
 import org.geometerplus.zlibrary.core.network.ZLNetworkException;
 
 import org.geometerplus.fbreader.network.authentication.NetworkAuthenticationManager;
+
+import org.geometerplus.android.util.UIUtil;
 
 
 class AuthenticationDialog extends NetworkDialog {
@@ -54,23 +54,10 @@ class AuthenticationDialog extends NetworkDialog {
 		registerText.setText(myResource.getResource("register").getValue());
 		registerText.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-				final NetworkAuthenticationManager mgr = myLink.authenticationManager();
-				if (mgr.registrationSupported()) {
+				//final NetworkAuthenticationManager mgr = myLink.authenticationManager();
+				if (Util.isRegistrationSupported(myActivity, myLink)) {
 					myActivity.dismissDialog(NetworkDialog.DIALOG_AUTHENTICATION);
-					NetworkDialog.show(myActivity, NetworkDialog.DIALOG_REGISTER_USER, myLink, new Runnable() {
-						public void run() {
-							try {
-								if (mgr.isAuthorised(true)) {
-									if (myOnSuccessRunnable != null) {
-										myOnSuccessRunnable.run();
-									}
-									return;
-								}
-							} catch (ZLNetworkException e) {
-							}
-							NetworkDialog.show(myActivity, NetworkDialog.DIALOG_AUTHENTICATION, myLink, myOnSuccessRunnable);
-						}
-					});
+					Util.runRegistrationDialog(myActivity, myLink);
 				}
 			}
 		});
@@ -139,7 +126,7 @@ class AuthenticationDialog extends NetworkDialog {
 			error.setText(myErrorMessage);
 		}
 
-		dialog.findViewById(R.id.network_authentication_register).setVisibility(mgr.registrationSupported() ? View.VISIBLE : View.GONE);
+		dialog.findViewById(R.id.network_authentication_register).setVisibility(Util.isRegistrationSupported(myActivity, myLink) ? View.VISIBLE : View.GONE);
 
 		View dlgView = dialog.findViewById(R.id.network_authentication_dialog);
 		dlgView.invalidate();

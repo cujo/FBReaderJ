@@ -6,15 +6,41 @@
 		<node name="demo" value="sample"/>
 	</node>
 	<node name="libraryView">
-		<node name="byAuthor" value="By author"/>
-		<node name="byTag" value="By tag"/>
-		<node name="recent" value="Recent"/>
-		<node name="searchResults" value="Found"/>
+		<node name="byAuthor" value="By author">
+			<node name="summary" value="Books sorted by author"/>
+		</node>
+		<node name="byTag" value="By tag">
+			<node name="summary" value="Books sorted by tag"/>
+		</node>
+		<node name="recent" value="Recent">
+			<node name="summary" value="Recently opened books"/>
+		</node>
+		<node name="favorites" value="Favorites">
+			<node name="summary" value="My selected books"/>
+		</node>
+		<node name="searchResults" value="Found">
+			<node name="summary" value="Search results for: %s"/>
+		</node>
+		<node name="fileTree" value="File tree">
+			<node name="summary" value="Browse file system"/>
+		</node>
+		<node name="fileTreeRoot" value="Device">
+			<node name="summary" value="Full file system of the device"/>
+		</node>
+		<node name="fileTreeCard" value="Memory card">
+			<node name="summary" value="Memory card inserted into the device"/>
+		</node>
+		<node name="fileTreeLibrary" value="FBReader library">
+			<node name="summary" value="FBReader books directory"/>
+		</node>
 		<node name="menu">
 			<node name="localSearch" value="Local search"/>
 		</node>
 		<node name="openBook" value="Open book"/>
+		<node name="showBookInfo" value="Book info"/>
 		<node name="deleteBook" value="Delete book"/>
+		<node name="addToFavorites" value="Add to favorites"/>
+		<node name="removeFromFavorites" value="Remove from favorites"/>
 	</node>
 	<node name="networkView">
 		<node name="openCatalog" value="Open catalog"/>
@@ -34,6 +60,8 @@
 		<node name="signOut" value="Sign out (%s)"/>
 		<node name="refillAccount" value="Refill account (currently: %s)"/>
 		<node name="refillTitle" value="Refill account"/>
+		<node name="refillViaSms" value="Text messages"/>
+		<node name="refillViaBrowser" value="Open page in browser"/>
 		<node name="refillSummary" value="Currently: %s"/>
 		<node name="alreadyDownloading" value="Book is being downloaded" />
 		<node name="alreadyDownloadingDemo" value="Sample is being downloaded" />
@@ -60,6 +88,7 @@
 			<node name="networkSearch" value="Network search"/>
 			<node name="reload" value="Reload"/>
 			<node name="signIn" value="Sign in"/>
+			<node name="signUp" value="Sign up"/>
 			<node name="signOut" value="Sign out (%s)"/>
 			<node name="refillAccount" value="Refill account"/>
 			<node name="addCustomCatalog" value="Add catalog"/>
@@ -76,6 +105,25 @@
 		<node name="series" value="Series:" />
 		<node name="indexInSeries" value="Index in series:" />
 		<node name="tags" value="Tags:" />
+	</node>
+	<node name="bookInfo">
+		<node name="bookInfo" value="Book Info" />
+		<node name="fileInfo" value="File Info" />
+		<node name="annotation" value="Annotation" />
+		<node name="title" value="Title:" />
+		<node name="authors" value="Authors:" />
+		<node name="series" value="Series:" />
+		<node name="indexInSeries" value="Index in series:" />
+		<node name="tags" value="Tags:" />
+		<node name="name" value="Name:" />
+		<node name="type" value="Type:" />
+		<node name="size" value="Size:" />
+		<node name="time" value="Last modified:" />
+		<node name="sizeInBytes" value="%s byte(s)" />
+		<node name="sizeInKiloBytes" value="%s kB" />
+		<node name="menu">
+			<node name="edit" value="Edit" />
+		</node>
 	</node>
 	<node name="bookDownloader">
 		<node name="tickerSuccess" value="Book has been downloaded" />
@@ -110,6 +158,8 @@
 		<node name="day" value="Day"/>
 		<node name="night" value="Night"/>
 		<node name="networkLibrary" value="Network library"/>
+		<node name="hyperlinksOnlyMode" value="Standard mode"/>
+		<node name="dictionaryMode" value="Dictionary mode"/>
 		<node name="navigate" value="Navigate">
 			<node name="toc" value="Table of Contents"/>
 			<node name="gotoHome" value="Go to Start of Document"/>
@@ -135,11 +185,27 @@
 	</node>
 	<node name="dialog">
 		<node name="button">
+			<node name="install" value="Install" />
+			<node name="update" value="Update" />
+			<node name="skip" value="Skip" />
 			<node name="buy" value="Buy" />
 			<node name="buyAndDownload" value="Buy and download" />
 			<node name="continue" value="Continue" />
 			<node name="editUrl" value="Edit URL" />
 			<node name="tryAgain" value="Try again" />
+			<node name="openBook" value="Read" />
+			<node name="editInfo" value="Edit" />
+			<node name="reloadInfo" value="Reload" />
+		</node>
+		<node name="installPlugin">
+			<node name="title" value="Install plugin"/>
+		</node>
+		<node name="updatePlugin">
+			<node name="title" value="Update plugin"/>
+		</node>
+		<node name="installDictionary">
+			<node name="title" value="Install dictionary"/>
+			<node name="message" value="Would you like to install %s?"/>
 		</node>
 		<node name="BookInfo">
 			<node name="fileName" value="File name"/>
@@ -433,7 +499,6 @@
 			<node name="authentication" value="Authentication. Please, wait..." />
 			<node name="signOut" value="Signing out. Please, wait..." />
 			<node name="purchaseBook" value="Purchase book. Please, wait..." />
-			<node name="registerUser" value="Registering new account. Please, wait..." />
 			<node name="loadingCatalogInfo" value="Loading catalog information. Please, wait..." />
 			<node name="updatingCatalogsList" value="Updating catalogs list. Please, wait..."/>
 		</node>
@@ -444,12 +509,6 @@
 			<node name="purchaseAlreadyPurchased" value="Already purchased" />
 			<node name="bookNotPurchased" value="Book was not purchased" />
 			<node name="downloadLimitExceeded" value="Download limit exceeded" />
-			<node name="loginAlreadyTaken" value="Username is already in use" />
-			<node name="loginNotSpecified" value="Please, enter a username" />
-			<node name="passwordNotSpecified" value="Please, enter a non-empty password" />
-			<node name="emailNotSpecified" value="Please, enter an e-mail address" />
-			<node name="invalidEMail" value="Invalid e-mail address" />
-			<node name="tooManyRegistrations" value="Too many registrations from your IP;&#10;try again in a few minutes" />
 			<node name="noUserEmail" value="No user was registered&#10;with specified e-mail address" />
 			<node name="unsupportedOperation" value="Unsupported operation" />
 			<node name="notAnOPDS" value="This is not an OPDS catalog" />
@@ -471,14 +530,6 @@
 			<node name="skipIP" value="Don't bound to ip-address" />
 			<node name="loginIsEmpty" value="Username should be non-empty" />
 			<node name="register" value="Sign up" />
-		</node>
-		<node name="RegisterUserDialog">
-			<node name="title" value="Register User" />
-			<node name="login" value="Username" />
-			<node name="password" value="Password" />
-			<node name="confirmPassword" value="Password&#10;confirmation" />
-			<node name="email" value="E-mail" />
-			<node name="differentPasswords" value="Password and password confirmation must be the same." />
 		</node>
 		<node name="CustomCatalogDialog">
 			<node name="title" value="Custom catalog" />
@@ -507,10 +558,14 @@
 		</node>
 	</node>
 	<node name="errorMessage">
+		<node name="cannotRunAndroidMarket" value="Cannot access Android Market. Please, install %s manually"/>
 		<node name="textNotFound" value="There is no suitable text in the book, sorry"/>
 		<node name="bookNotFound" value="There are no suitable books in the library, sorry"/>
 		<node name="bookmarkNotFound" value="There are no suitable bookmarks, sorry"/>
 		<node name="cannotOpenBook" value="Cannot open this book at the moment, sorry"/>
+		<node name="dictionaryIsNotInstalled" value="Dictionary is not installed, sorry"/>
+		<node name="permissionDenied" value="Permission denied, sorry"/>
+		<node name="noFavorites" value="Your favorites list is empty, sorry"/>
 	</node>
 	<node name="external">
 		<node name="browser" value="Browser"/>

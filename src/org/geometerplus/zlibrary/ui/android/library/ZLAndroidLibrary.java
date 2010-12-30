@@ -25,8 +25,6 @@ import java.util.*;
 import android.app.Application;
 import android.content.res.AssetFileDescriptor;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
@@ -34,18 +32,10 @@ import android.util.DisplayMetrics;
 import org.geometerplus.zlibrary.core.library.ZLibrary;
 import org.geometerplus.zlibrary.core.filesystem.ZLFile;
 import org.geometerplus.zlibrary.core.filesystem.ZLResourceFile;
-import org.geometerplus.zlibrary.core.network.ZLNetworkException;
-import org.geometerplus.zlibrary.core.image.ZLImage;
 
 import org.geometerplus.zlibrary.ui.android.R;
 import org.geometerplus.zlibrary.ui.android.view.ZLAndroidWidget;
 import org.geometerplus.zlibrary.ui.android.dialogs.ZLAndroidDialogManager;
-import org.geometerplus.zlibrary.ui.android.image.ZLAndroidResourceBasedImageData;
-
-import org.geometerplus.android.fbreader.network.BookDownloader;
-import org.geometerplus.android.fbreader.network.BookDownloaderService;
-
-import org.geometerplus.fbreader.network.NetworkLibrary;
 
 public final class ZLAndroidLibrary extends ZLibrary {
 	private ZLAndroidActivity myActivity;
@@ -81,24 +71,6 @@ public final class ZLAndroidLibrary extends ZLibrary {
 		return myWidget;
 	}
 
-	public void openInBrowser(String reference) {
-		final Intent intent = new Intent(Intent.ACTION_VIEW);
-		boolean externalUrl = true;
-		if (BookDownloader.acceptsUri(Uri.parse(reference))) {
-			intent.setClass(myActivity, BookDownloader.class);
-			intent.putExtra(BookDownloaderService.SHOW_NOTIFICATIONS_KEY, BookDownloaderService.Notifications.ALL);
-			externalUrl = false;
-		}
-		final NetworkLibrary nLibrary = NetworkLibrary.Instance();
-		try {
-			nLibrary.initialize();
-		} catch (ZLNetworkException e) {
-		}
-		reference = NetworkLibrary.Instance().rewriteUrl(reference, externalUrl);
-		intent.setData(Uri.parse(reference));
-		myActivity.startActivity(intent);
-	}
-
 	@Override
 	public ZLResourceFile createResourceFile(String path) {
 		return new AndroidAssetsFile(path);
@@ -107,10 +79,6 @@ public final class ZLAndroidLibrary extends ZLibrary {
 	@Override
 	public ZLResourceFile createResourceFile(ZLResourceFile parent, String name) {
 		return new AndroidAssetsFile((AndroidAssetsFile)parent, name);
-	}
-
-	public ZLImage createImage(int drawableId) {
-		return new ZLAndroidResourceBasedImageData(myApplication.getResources(), drawableId);
 	}
 
 	@Override

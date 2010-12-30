@@ -189,7 +189,7 @@ class NetworkBookActions extends NetworkTreeActions {
 	}
 
 	@Override
-	public int getDefaultActionCode(NetworkTree tree) {
+	public int getDefaultActionCode(NetworkBaseActivity activity, NetworkTree tree) {
 		if (tree instanceof NetworkAuthorTree || tree instanceof NetworkSeriesTree) {
 			return SHOW_BOOKS_ITEM_ID;
 		}
@@ -207,7 +207,7 @@ class NetworkBookActions extends NetworkTreeActions {
 	}
 
 	@Override
-	public boolean prepareOptionsMenu(Menu menu, NetworkTree tree) {
+	public boolean prepareOptionsMenu(NetworkBaseActivity activity, Menu menu, NetworkTree tree) {
 		return false;
 	}
 
@@ -442,7 +442,7 @@ class NetworkBookActions extends NetworkTreeActions {
 	private static void doBuyInBrowser(Activity activity, final NetworkBookItem book) {
 		BookReference reference = book.reference(BookReference.Type.BUY_IN_BROWSER);
 		if (reference != null) {
-			NetworkView.Instance().openInBrowser(activity, reference.URL);
+			Util.openInBrowser(activity, reference.URL);
 		}
 	}
 

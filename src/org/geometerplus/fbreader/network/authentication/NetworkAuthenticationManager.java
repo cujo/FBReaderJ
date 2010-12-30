@@ -19,6 +19,7 @@
 
 package org.geometerplus.fbreader.network.authentication;
 
+import java.util.Map;
 import java.util.HashMap;
 
 import org.geometerplus.zlibrary.core.options.ZLStringOption;
@@ -30,7 +31,6 @@ import org.geometerplus.fbreader.network.authentication.litres.LitResAuthenticat
 
 
 public abstract class NetworkAuthenticationManager {
-
 	private static final HashMap<String, NetworkAuthenticationManager> ourManagers = new HashMap<String, NetworkAuthenticationManager>();
 
 	public static NetworkAuthenticationManager createManager(INetworkLink link, String sslCertificate, Class<? extends NetworkAuthenticationManager> managerClass) {
@@ -64,6 +64,7 @@ public abstract class NetworkAuthenticationManager {
 	public abstract void authorise(String password) throws ZLNetworkException;
 	public abstract void logOut();
 	public abstract BookReference downloadReference(NetworkBookItem book);
+	public abstract Map<String,String> getSmsRefillingData();
 
 
 	public final boolean mayBeAuthorised(boolean useNetwork) {
@@ -106,24 +107,11 @@ public abstract class NetworkAuthenticationManager {
 	 * refill account
 	 */
 
-	public boolean refillAccountSupported() {
-		return false;
-	}
-
 	public String refillAccountLink() {
 		return null;
 	}
 
-	/*
-	 * new User Registration
-	 */
-	public boolean registrationSupported() {
-		return false;
-	}
-
-	public void registerUser(String login, String password, String email) throws ZLNetworkException {
-		throw new ZLNetworkException(NetworkException.ERROR_UNSUPPORTED_OPERATION);
-	}
+	public abstract void initUser(String userName, String sid) throws ZLNetworkException;
 
 	/*
 	 * Password Recovery

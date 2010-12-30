@@ -22,13 +22,9 @@ package org.geometerplus.android.fbreader.network;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.view.MenuItem;
@@ -118,13 +114,13 @@ class NetworkView {
 		return false;
 	}
 
-	public boolean prepareOptionsMenu(Menu menu, NetworkTree tree) {
+	public boolean prepareOptionsMenu(NetworkBaseActivity activity, Menu menu, NetworkTree tree) {
 		if (!isInitialized()) {
 			return false;
 		}
 		final NetworkTreeActions actions = getActions(tree);
 		if (actions != null) {
-			return actions.prepareOptionsMenu(menu, tree);
+			return actions.prepareOptionsMenu(activity, menu, tree);
 		}
 		return false;
 	}
@@ -191,83 +187,6 @@ class NetworkView {
 			expandRunnable.run();
 		} else {
 			runnable.runOnFinish(expandRunnable);
-		}
-	}
-
-	/*
-	 * Loading covers
-	 */
-
-	private static class MinPriorityThreadFactory implements ThreadFactory {
-		private final ThreadFactory myDefaultThreadFactory = Executors.defaultThreadFactory();
-
-		public Thread newThread(Runnable r) {
-			final Thread th = myDefaultThreadFactory.newThread(r);
-			th.setPriority(Thread.MIN_PRIORITY);
-			return th;
-		}
-	}
-
-	private static final int COVER_LOADING_THREADS_NUMBER = 3; // TODO: how many threads ???
-
-	private final ExecutorService myPool = Executors.newFixedThreadPool(COVER_LOADING_THREADS_NUMBER, new MinPriorityThreadFactory());
-
-	private final HashMap<String, LinkedList<Runnable>> myOnCoverSyncRunnables = new HashMap<String, LinkedList<Runnable>>();
-
-	private class CoverSynchronizedHandler extends Handler {
-		@Override
-		public void handleMessage(Message message) {
-			final String imageUrl = (String) message.obj;
-			final LinkedList<Runnable> runables = myOnCoverSyncRunnables.remove(imageUrl);
-			for (Runnable runnable: runables) {
-				runnable.run();
-			}
-		}
-
-		public void fireMessage(String imageUrl) {
-			sendMessage(obtainMessage(0, imageUrl));
-		}
-	};
-
-	private final CoverSynchronizedHandler myCoverSynchronizedHandler = new CoverSynchronizedHandler();
-
-	public void performCoverSynchronization(final NetworkImage image, Runnable finishRunnable) {
-		if (myOnCoverSyncRunnables.containsKey(image.Url)) {
-			return;
-		}
-		final LinkedList<Runnable> runnables = new LinkedList<Runnable>();
-		if (finishRunnable != null) {
-			runnables.add(finishRunnable);
-		}
-		myOnCoverSyncRunnables.put(image.Url, runnables);
-		myPool.execute(new Runnable() {
-			public void run() {
-				image.synchronize();
-				myCoverSynchronizedHandler.fireMessage(image.Url);
-			}
-		});
-	}
-
-	public final boolean isCoverLoading(String coverUrl) {
-		return myOnCoverSyncRunnables.containsKey(coverUrl);
-	}
-
-	public void addCoverSynchronizationRunnable(String coverUrl, Runnable finishRunnable) {
-		final LinkedList<Runnable> runnables = myOnCoverSyncRunnables.get(coverUrl);
-		if (runnables != null && finishRunnable != null) {
-			runnables.add(finishRunnable);
-		}
-	}
-
-
-	/*
-	 * Open Network URL in browser
-	 */
-
-	public void openInBrowser(Context context, String url) {
-		if (url != null) {
-			url = NetworkLibrary.Instance().rewriteUrl(url, true);
-			context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
 		}
 	}
 
