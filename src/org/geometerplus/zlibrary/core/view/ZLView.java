@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2007-2011 Geometer Plus <contact@geometerplus.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,30 @@ abstract public class ZLView {
 	}
 
 	public boolean onFingerMove(int x, int y) {
+		return false;
+	}
+
+	public boolean onFingerLongPress(int x, int y) {
+		return false;
+	}
+
+	public boolean onFingerReleaseAfterLongPress(int x, int y) {
+		return false;
+	}
+
+	public boolean onFingerMoveAfterLongPress(int x, int y) {
+		return false;
+	}
+
+	public boolean onFingerSingleTap(int x, int y) {
+		return false;
+	}
+
+	public boolean onFingerDoubleTap(int x, int y) {
+		return false;
+	}
+
+	public boolean isDoubleTapSupported() {
 		return false;
 	}
 

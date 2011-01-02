@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2009-2011 Geometer Plus <contact@geometerplus.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,9 +58,7 @@ public class PreferenceActivity extends ZLPreferenceActivity {
 
 		final Screen appearanceScreen = createPreferenceScreen("appearance");
 		appearanceScreen.addOption(androidApp.AutoOrientationOption, "autoOrientation");
-		if (!androidApp.isAlwaysShowStatusBar()) {
-			appearanceScreen.addOption(androidApp.ShowStatusBarOption, "showStatusBar");
-		}
+		appearanceScreen.addOption(androidApp.ShowStatusBarOption, "showStatusBar");
 
 		final Screen textScreen = createPreferenceScreen("text");
 		final ZLTextStyleCollection collection = ZLTextStyleCollection.Instance();
@@ -334,7 +332,8 @@ public class PreferenceActivity extends ZLPreferenceActivity {
 
 		final Screen scrollingScreen = createPreferenceScreen("scrolling");
 		final ScrollingPreferences scrollingPreferences = ScrollingPreferences.Instance();
-		scrollingScreen.addOption(scrollingPreferences.FlickOption, "flick");
+		scrollingScreen.addOption(scrollingPreferences.FingerScrollingOption, "fingerScrolling");
+		//scrollingScreen.addOption(scrollingPreferences.DoubleTapNavigationOption, "doubleTapNavigation");
 		scrollingScreen.addOption(scrollingPreferences.VolumeKeysOption, "volumeKeys");
 		scrollingScreen.addOption(scrollingPreferences.InvertVolumeKeysOption, "invertVolumeKeys");
 		scrollingScreen.addOption(scrollingPreferences.AnimateOption, "animated");
@@ -343,9 +342,14 @@ public class PreferenceActivity extends ZLPreferenceActivity {
 		final Screen dictionaryScreen = createPreferenceScreen("dictionary");
 		dictionaryScreen.addPreference(new ZLBooleanPreference(
 			this,
-			fbReader.OpenDictionaryOnTapOption,
+			fbReader.NavigateAllWordsOption,
 			dictionaryScreen.Resource,
-			"runDictionaryOnTap"
+			"navigateOverAllWords"
+		));
+		final String[] actions = { "doNothing", "selectWord", "openDictionary" };
+		dictionaryScreen.addPreference(new ZLChoicePreference(
+			this, dictionaryScreen.Resource, "tappingAction",
+			fbReader.DictionaryModeTappingActionOption, actions
 		));
 	}
 }
