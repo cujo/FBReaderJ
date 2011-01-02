@@ -365,7 +365,8 @@ public class ZLAndroidWidget extends View implements View.OnLongClickListener {
 	private volatile boolean myPendingDoubleTap;
 	private int myPressedX, myPressedY;
 	private boolean myScreenIsTouched;
-	private boolean onSingleTouchEvent(MotionEvent event) {
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
 		int x = (int)event.getX();
 		int y = (int)event.getY();
 
