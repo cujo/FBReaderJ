@@ -47,14 +47,14 @@ public final class FBView extends ZLTextView {
 	}
 
 	final void doScrollPage(boolean forward) {
-		final ScrollingPreferences preferences = ScrollingPreferences.Instance();
-		if (preferences.AnimateOption.getValue()) {
+		final boolean horizontal = ScrollingPreferences.Instance().HorizontalOption.getValue();
+		if (getAnimationType() != Animation.none) {
 			if (forward) {
 				ZLTextWordCursor cursor = getEndCursor();
 				if (cursor != null &&
 					!cursor.isNull() &&
 					(!cursor.isEndOfParagraph() || !cursor.getParagraphCursor().isLast())) {
-					startAutoScrolling(preferences.HorizontalOption.getValue() ? PAGE_RIGHT : PAGE_BOTTOM);
+					startAutoScrolling(horizontal ? PAGE_RIGHT : PAGE_BOTTOM);
   				} else if (myReader.getCurrentView() != myReader.BookTextView) {
 					myReader.showBookTextView();
 				}
@@ -63,7 +63,7 @@ public final class FBView extends ZLTextView {
 				if (cursor != null &&
 					!cursor.isNull() &&
 					(!cursor.isStartOfParagraph() || !cursor.getParagraphCursor().isFirst())) {
-					startAutoScrolling(preferences.HorizontalOption.getValue() ? PAGE_LEFT : PAGE_TOP);
+					startAutoScrolling(horizontal ? PAGE_LEFT : PAGE_TOP);
   				} else if (myReader.getCurrentView() != myReader.BookTextView) {
 					myReader.showBookTextView();
 				}
@@ -131,8 +131,7 @@ public final class FBView extends ZLTextView {
 
 	@Override
 	public boolean isDoubleTapSupported() {
-		return true;
-		//return ScrollingPreferences.Instance().DoubleTapNavigationOption.getValue();
+		return myReader.EnableDoubleTapOption.getValue();
 	}
 
 	@Override
@@ -172,15 +171,16 @@ public final class FBView extends ZLTextView {
 			return true;
 		}
 
-		final ScrollingPreferences preferences = ScrollingPreferences.Instance();
-		final ScrollingPreferences.FingerScrolling fingerScrolling =
-			preferences.FingerScrollingOption.getValue();
-		if (fingerScrolling == ScrollingPreferences.FingerScrolling.byFlick ||
-			fingerScrolling == ScrollingPreferences.FingerScrolling.byTapAndFlick) {
-			myStartX = x;
-			myStartY = y;
-			setScrollingActive(true);
-			myIsManualScrollingActive = true;
+		if (getAnimationType() != Animation.none) {
+			final ScrollingPreferences.FingerScrolling fingerScrolling =
+				ScrollingPreferences.Instance().FingerScrollingOption.getValue();
+			if (fingerScrolling == ScrollingPreferences.FingerScrolling.byFlick ||
+				fingerScrolling == ScrollingPreferences.FingerScrolling.byTapAndFlick) {
+				myStartX = x;
+				myStartY = y;
+				setScrollingActive(true);
+				myIsManualScrollingActive = true;
+			}
 		}
 
 		return true;
@@ -267,7 +267,7 @@ public final class FBView extends ZLTextView {
 							((diff < 0) ? PAGE_RIGHT : PAGE_LEFT) :
 							((diff < 0) ? PAGE_BOTTOM : PAGE_TOP);
 					}
-					if (ScrollingPreferences.Instance().AnimateOption.getValue()) {
+					if (getAnimationType() != Animation.none) {
 						startAutoScrolling(viewPage);
 					} else {
 						myReader.scrollViewTo(PAGE_CENTRAL, 0);
@@ -287,8 +287,8 @@ public final class FBView extends ZLTextView {
 			return true;
 		}
 
-		if (myReader.DictionaryModeTappingActionOption.getValue() !=
-			FBReaderApp.DictionaryModeTappingAction.DO_NOTHING) {
+		if (myReader.DictionaryTappingActionOption.getValue() !=
+			FBReaderApp.DictionaryTappingAction.doNothing) {
 			final ZLTextElementRegion region = findRegion(x, y, 10, ZLTextElementRegion.Filter);
 			if (region != null) {
 				selectRegion(region);
@@ -305,8 +305,8 @@ public final class FBView extends ZLTextView {
 			return true;
 		}
 
-		if (myReader.DictionaryModeTappingActionOption.getValue() !=
-			FBReaderApp.DictionaryModeTappingAction.DO_NOTHING) {
+		if (myReader.DictionaryTappingActionOption.getValue() !=
+			FBReaderApp.DictionaryTappingAction.doNothing) {
 			final ZLTextElementRegion region = findRegion(x, y, 10, ZLTextElementRegion.Filter);
 			if (region != null) {
 				selectRegion(region);
@@ -321,8 +321,8 @@ public final class FBView extends ZLTextView {
 			return true;
 		}
 
-		if (myReader.DictionaryModeTappingActionOption.getValue() ==
-			FBReaderApp.DictionaryModeTappingAction.OPEN_DICTIONARY) {
+		if (myReader.DictionaryTappingActionOption.getValue() ==
+			FBReaderApp.DictionaryTappingAction.openDictionary) {
 			final ZLTextElementRegion region = currentRegion();
 			if (region instanceof ZLTextWordRegion) {
 				myReader.doAction(ActionCode.PROCESS_HYPERLINK);
@@ -564,5 +564,10 @@ public final class FBView extends ZLTextView {
 	@Override
 	public int scrollbarType() {
 		return myReader.ScrollbarTypeOption.getValue();
+	}
+
+	@Override
+	public Animation getAnimationType() {
+		return ScrollingPreferences.Instance().AnimationOption.getValue();
 	}
 }

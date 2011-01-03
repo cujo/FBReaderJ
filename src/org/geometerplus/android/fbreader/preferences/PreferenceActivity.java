@@ -333,10 +333,10 @@ public class PreferenceActivity extends ZLPreferenceActivity {
 		final Screen scrollingScreen = createPreferenceScreen("scrolling");
 		final ScrollingPreferences scrollingPreferences = ScrollingPreferences.Instance();
 		scrollingScreen.addOption(scrollingPreferences.FingerScrollingOption, "fingerScrolling");
-		//scrollingScreen.addOption(scrollingPreferences.DoubleTapNavigationOption, "doubleTapNavigation");
+		scrollingScreen.addOption(fbReader.EnableDoubleTapOption, "enableDoubleTapDetection");
 		scrollingScreen.addOption(scrollingPreferences.VolumeKeysOption, "volumeKeys");
 		scrollingScreen.addOption(scrollingPreferences.InvertVolumeKeysOption, "invertVolumeKeys");
-		scrollingScreen.addOption(scrollingPreferences.AnimateOption, "animated");
+		scrollingScreen.addOption(scrollingPreferences.AnimationOption, "animation");
 		scrollingScreen.addOption(scrollingPreferences.HorizontalOption, "horizontal");
 
 		final Screen dictionaryScreen = createPreferenceScreen("dictionary");
@@ -346,10 +346,6 @@ public class PreferenceActivity extends ZLPreferenceActivity {
 			dictionaryScreen.Resource,
 			"navigateOverAllWords"
 		));
-		final String[] actions = { "doNothing", "selectWord", "openDictionary" };
-		dictionaryScreen.addPreference(new ZLChoicePreference(
-			this, dictionaryScreen.Resource, "tappingAction",
-			fbReader.DictionaryModeTappingActionOption, actions
-		));
+		dictionaryScreen.addOption(fbReader.DictionaryTappingActionOption, "tappingAction");
 	}
 }
