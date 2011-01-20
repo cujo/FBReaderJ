@@ -45,10 +45,13 @@ abstract class LibraryBaseActivity extends BaseActivity implements MenuItem.OnMe
 	static final String PATH_SEARCH_RESULTS = "searchResults";
 	static final String PATH_RECENT = "recent";
 	static final String PATH_BY_AUTHOR = "byAuthor";
+	static final String PATH_BY_TITLE = "byTitle";
 	static final String PATH_BY_TAG = "byTag";
 
 	static final ZLStringOption BookSearchPatternOption =
 		new ZLStringOption("BookSearch", "Pattern", "");
+
+	protected Book mySelectedBook;
 
 	@Override
 	protected void onActivityResult(int requestCode, int returnCode, Intent intent) {
@@ -114,6 +117,17 @@ abstract class LibraryBaseActivity extends BaseActivity implements MenuItem.OnMe
 			return myItems.size();
 		}
 
+		public int getFirstSelectedItemIndex() {
+			int index = 0;
+			for (FBTree t : myItems) {
+				if (isTreeSelected(t)) {
+					return index;
+				}
+				++index;
+			}
+			return -1;
+		}
+
 		public final FBTree getItem(int position) {
 			return myItems.get(position);
 		}
@@ -133,10 +147,8 @@ abstract class LibraryBaseActivity extends BaseActivity implements MenuItem.OnMe
 		public View getView(int position, View convertView, final ViewGroup parent) {
 			final FBTree tree = getItem(position);
 			final View view = createView(convertView, parent, tree.getName(), tree.getSecondString());
-			if (tree instanceof BookTree &&
-				mySelectedBookPath != null &&
-				mySelectedBookPath.equals(((BookTree)tree).Book.File.getPath())) {
-				view.setBackgroundColor(0xff808080);
+			if (isTreeSelected(tree)) {
+				view.setBackgroundColor(0xff555555);
 			} else {
 				view.setBackgroundColor(0);
 			}
@@ -178,6 +190,40 @@ abstract class LibraryBaseActivity extends BaseActivity implements MenuItem.OnMe
 	protected void deleteBook(Book book, int mode) {
 		super.deleteBook(book, mode);
 		getListView().invalidateViews();
+	}
+
+	protected boolean isTreeSelected(FBTree tree) {
+		if (mySelectedBook == null) {
+			return false;
+		}
+
+		if (tree instanceof BookTree) {
+			return mySelectedBook.equals(((BookTree)tree).Book);
+		}
+		if (tree instanceof AuthorTree) {
+			return mySelectedBook.authors().contains(((AuthorTree)tree).Author);
+		}
+		if (tree instanceof TitleTree) {
+			final String title = mySelectedBook.getTitle();
+			return tree != null && title.trim().startsWith(((TitleTree)tree).Title);
+		}
+		if (tree instanceof SeriesTree) {
+			final SeriesInfo info = mySelectedBook.getSeriesInfo();
+			final String series = ((SeriesTree)tree).Series;
+			return info != null && series != null && series.equals(info.Name);
+		}
+		if (tree instanceof TagTree) {
+			final Tag tag = ((TagTree)tree).Tag;
+			for (Tag t : mySelectedBook.tags()) {
+				for (; t != null; t = t.Parent) {
+					if (t == tag) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		return false;
 	}
 
 	protected class StartTreeActivityRunnable implements Runnable {

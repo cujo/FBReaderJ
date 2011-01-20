@@ -23,6 +23,8 @@ import java.util.*;
 
 import org.geometerplus.zlibrary.core.application.ZLApplication;
 import org.geometerplus.zlibrary.core.view.ZLPaintContext;
+import org.geometerplus.zlibrary.core.filesystem.ZLFile;
+
 import org.geometerplus.zlibrary.text.model.*;
 import org.geometerplus.zlibrary.text.hyphenation.*;
 import org.geometerplus.zlibrary.text.view.style.ZLTextStyleCollection;
@@ -252,7 +254,12 @@ public abstract class ZLTextView extends ZLTextViewBase {
 	@Override
 	public synchronized void paint(ZLPaintContext context, int viewPage) {
 		myContext = context;
-		context.clear(getBackgroundColor());
+		final ZLFile wallpaper = getWallpaperFile();
+		if (wallpaper != null) {
+			context.clear(wallpaper);
+		} else {
+			context.clear(getBackgroundColor());
+		}
 
 		if ((myModel == null) || (myModel.getParagraphsNumber() == 0)) {
 			return;
@@ -1345,11 +1352,21 @@ public abstract class ZLTextView extends ZLTextViewBase {
 	}
 
 	protected ZLTextElementRegion currentRegion() {
-		return mySelectedRegion;
+		if (mySelectedRegion == null) {
+			return null;
+		}
+		final ArrayList<ZLTextElementRegion> elementRegions =
+			myCurrentPage.TextElementMap.ElementRegions;
+		if (elementRegions.isEmpty()) {
+			return null;
+		}
+		final int index = elementRegions.indexOf(mySelectedRegion);
+		return index >= 0 ? elementRegions.get(index) : null;
 	}
 
 	protected ZLTextElementRegion nextRegion(int direction, ZLTextElementRegion.Filter filter) {
-		final ArrayList<ZLTextElementRegion> elementRegions = myCurrentPage.TextElementMap.ElementRegions;
+		final ArrayList<ZLTextElementRegion> elementRegions =
+			myCurrentPage.TextElementMap.ElementRegions;
 		if (elementRegions.isEmpty()) {
 			return null;
 		}
